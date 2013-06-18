@@ -32,7 +32,7 @@ import eu.stratosphere.pact.generic.io.SequentialOutputFormat;
 import eu.stratosphere.pact.runtime.plugable.pactrecord.PactRecordSerializerFactory;
 
 /**
- * Tests {@link InputFileIterator}.
+ * Tests {@link InputIterator}.
  * 
  * @author Arvid Heise
  */
@@ -45,7 +45,7 @@ public class InputFileIteratorTest {
 	 */
 	@Test
 	public void emptyIteratorShouldReturnNoElements() throws IOException {
-		InputFileIterator<PactRecord> inputFileIterator = createFileIterator();
+		InputIterator<PactRecord> inputFileIterator = createFileIterator();
 
 		AssertUtil.assertIteratorEquals("input file iterator is not empty", new ArrayList<PactRecord>().iterator(),
 			inputFileIterator, 
@@ -62,7 +62,7 @@ public class InputFileIteratorTest {
 	public void filledIteratorShouldReturnExactlyTheGivenArguments() throws IOException {
 		PactRecord[] pairs = { new PactRecord(new PactInteger(1), new PactString("test1")),
 			new PactRecord(new PactInteger(2), new PactString("test2")) };
-		InputFileIterator<PactRecord> inputFileIterator = createFileIterator(pairs);
+		InputIterator<PactRecord> inputFileIterator = createFileIterator(pairs);
 
 		AssertUtil.assertIteratorEquals("input file iterator does not return the right sequence of pairs", Arrays
 			.asList(pairs).iterator(), inputFileIterator, 
@@ -84,7 +84,7 @@ public class InputFileIteratorTest {
 			new PactRecord(new PactInteger(4), new PactString("test4")),
 			new PactRecord(new PactInteger(5), new PactString("test5")),
 			new PactRecord(new PactInteger(6), new PactString("test6")) };
-		InputFileIterator<PactRecord> inputFileIterator = createFileIterator(pairs);
+		InputIterator<PactRecord> inputFileIterator = createFileIterator(pairs);
 
 		AssertUtil.assertIteratorEquals("input file iterator does not return the right sequence of pairs", Arrays
 			.asList(pairs).iterator(), inputFileIterator, 
@@ -103,8 +103,8 @@ public class InputFileIteratorTest {
 		@SuppressWarnings("unchecked")
 		SequentialInputFormat<PactRecord> inputFormat = FormatUtil.openInput(SequentialInputFormat.class, testPlanFile,
 			null);
-		InputFileIterator<PactRecord> inputFileIterator = 
-				new InputFileIterator<PactRecord>(PactRecordSerializerFactory.get().getSerializer(), inputFormat);
+		InputIterator<PactRecord> inputFileIterator = 
+				new InputIterator<PactRecord>(PactRecordSerializerFactory.get().getSerializer(), inputFormat);
 
 		AssertUtil.assertIteratorEquals("input file iterator is not empty",
 			new ArrayList<PactRecord>().iterator(),
@@ -122,7 +122,7 @@ public class InputFileIteratorTest {
 	public void failIfReadTwoManyItems() throws IOException {
 		PactRecord[] pairs = { new PactRecord(new PactInteger(1), new PactString("test1")),
 			new PactRecord(new PactInteger(2), new PactString("test2")) };
-		InputFileIterator<PactRecord> inputFileIterator = createFileIterator(pairs);
+		InputIterator<PactRecord> inputFileIterator = createFileIterator(pairs);
 
 		while (inputFileIterator.hasNext())
 			Assert.assertNotNull(inputFileIterator.next());
@@ -135,7 +135,7 @@ public class InputFileIteratorTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	private InputFileIterator<PactRecord> createFileIterator(PactRecord... pairs)
+	private InputIterator<PactRecord> createFileIterator(PactRecord... pairs)
 			throws IOException {
 		String testPlanFile = GenericTestPlan.getTestPlanFile("fileIteratorTest");
 		SequentialOutputFormat output =
@@ -145,8 +145,8 @@ public class InputFileIteratorTest {
 		output.close();
 		SequentialInputFormat<PactRecord> inputFormat =
 			FormatUtil.openInput(SequentialInputFormat.class, testPlanFile, null);
-		InputFileIterator<PactRecord> inputFileIterator =
-			new InputFileIterator<PactRecord>(PactRecordSerializerFactory.get().getSerializer(), inputFormat);
+		InputIterator<PactRecord> inputFileIterator =
+			new InputIterator<PactRecord>(PactRecordSerializerFactory.get().getSerializer(), inputFormat);
 		return inputFileIterator;
 	}
 }

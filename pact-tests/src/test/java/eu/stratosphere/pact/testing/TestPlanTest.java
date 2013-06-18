@@ -305,7 +305,7 @@ public class TestPlanTest {
 		FileDataSink output = createOutput(map, IntegerOutFormat.class);
 
 		TestPlan testPlan = new TestPlan(output);
-		testPlan.getExpectedOutput(output, IntStringPair).fromFile(IntegerInFormat.class,
+		testPlan.getExpectedOutput(output, IntStringPair).load(IntegerInFormat.class,
 			getResourcePath("TestPlan/test.txt"));
 		testPlan.run();
 	}

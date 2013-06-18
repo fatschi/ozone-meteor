@@ -29,7 +29,7 @@ import eu.stratosphere.nephele.services.memorymanager.spi.DefaultMemoryManager;
  */
 class TestEnvironment {
 	// at least 64 mb
-	private static final long MEMORY_SIZE = Runtime.getRuntime().maxMemory() / 2;
+	private static final long MEMORY_SIZE = Runtime.getRuntime().maxMemory() / 4;
 
 	private MemoryManager memoryManager;
 

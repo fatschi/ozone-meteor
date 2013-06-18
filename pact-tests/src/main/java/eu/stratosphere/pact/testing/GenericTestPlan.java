@@ -44,6 +44,7 @@ import eu.stratosphere.pact.common.util.Visitor;
 import eu.stratosphere.pact.generic.contract.Contract;
 import eu.stratosphere.pact.generic.io.FileInputFormat;
 import eu.stratosphere.pact.generic.io.FileOutputFormat;
+import eu.stratosphere.pact.generic.io.GenericInputFormat;
 import eu.stratosphere.pact.generic.io.SequentialInputFormat;
 import eu.stratosphere.pact.generic.io.SequentialOutputFormat;
 
@@ -111,16 +112,16 @@ public abstract class GenericTestPlan<T extends Record, Records extends GenericT
 	private final Map<GenericDataSource<?>, Records> inputs =
 		new IdentityHashMap<GenericDataSource<?>, Records>();
 
-	private final List<FileDataSink> sinks = new ArrayList<FileDataSink>();
+	private final List<GenericDataSink> sinks = new ArrayList<GenericDataSink>();
 
-	private final List<FileDataSource> sources = new ArrayList<FileDataSource>();
+	private final List<GenericDataSource<?>> sources = new ArrayList<GenericDataSource<?>>();
 
 	private TypeConfig<T> defaultConfig;
 
 	/**
 	 * Initializes TestPlan with the given {@link Contract}s. Like the original {@link Plan}, the contracts may be
 	 * {@link GenericDataSink}s. However, it
-	 * is also possible to add arbitrary Contracts, to which FileDataSinkContracts
+	 * is also possible to add arbitrary Contracts, to which GenericDataSinkContracts
 	 * are automatically added.
 	 * 
 	 * @param contracts
@@ -133,7 +134,7 @@ public abstract class GenericTestPlan<T extends Record, Records extends GenericT
 	/**
 	 * Initializes TestPlan with the given {@link Contract}s. Like the original {@link Plan}, the contracts may be
 	 * {@link GenericDataSink}s. However, it
-	 * is also possible to add arbitrary Contracts, to which FileDataSinkContracts
+	 * is also possible to add arbitrary Contracts, to which GenericDataSinkContracts
 	 * are automatically added.
 	 * 
 	 * @param contracts
@@ -205,7 +206,7 @@ public abstract class GenericTestPlan<T extends Record, Records extends GenericT
 	 * @return the output {@link GenericTestRecords} of the TestPlan associated with the
 	 *         given sink
 	 */
-	public Records getActualOutput(final FileDataSink sink) {
+	public Records getActualOutput(final GenericDataSink sink) {
 		return this.getActualOutput(sink, this.defaultConfig);
 	}
 
@@ -235,7 +236,7 @@ public abstract class GenericTestPlan<T extends Record, Records extends GenericT
 	 * @return the output {@link GenericTestRecords} of the TestPlan associated with the
 	 *         given sink
 	 */
-	public Records getActualOutput(final FileDataSink sink, final TypeConfig<T> typeConfig) {
+	public Records getActualOutput(final GenericDataSink sink, final TypeConfig<T> typeConfig) {
 		Records values = this.actualOutputs.get(sink);
 		if (values == null)
 			this.actualOutputs.put(sink,
@@ -296,7 +297,7 @@ public abstract class GenericTestPlan<T extends Record, Records extends GenericT
 	 * @return the expected output {@link GenericTestRecords} of the TestPlan associated
 	 *         with the given sink
 	 */
-	public Records getExpectedOutput(final FileDataSink sink, TypeConfig<T> typeConfig) {
+	public Records getExpectedOutput(final GenericDataSink sink, TypeConfig<T> typeConfig) {
 		Records values = this.expectedOutputs.get(sink);
 		if (values == null) {
 			this.expectedOutputs.put(sink,
@@ -477,7 +478,7 @@ public abstract class GenericTestPlan<T extends Record, Records extends GenericT
 	 * 
 	 * @return the sinks
 	 */
-	public List<FileDataSink> getSinks() {
+	public List<GenericDataSink> getSinks() {
 		return this.sinks;
 	}
 
@@ -486,7 +487,7 @@ public abstract class GenericTestPlan<T extends Record, Records extends GenericT
 	 * 
 	 * @return the sources
 	 */
-	public List<FileDataSource> getSources() {
+	public List<GenericDataSource<?>> getSources() {
 		return this.sources;
 	}
 
@@ -536,9 +537,11 @@ public abstract class GenericTestPlan<T extends Record, Records extends GenericT
 	 * one {@link SequentialOutputFormat}.
 	 */
 	private Plan buildPlanWithReadableSinks() {
-		final Collection<FileDataSink> existingSinks = this.getDataSinks();
+		final Collection<GenericDataSink> existingSinks = this.getDataSinks();
 		final Collection<GenericDataSink> wrappedSinks = new ArrayList<GenericDataSink>();
-		for (final FileDataSink fileSink : existingSinks)
+		for (final GenericDataSink fileSink : existingSinks) {
+			if (!(fileSink instanceof FileDataSink))
+				continue;
 			// need a format which is deserializable without configuration
 			if (!fileSink.getFormatClass().equals(SequentialOutputFormat.class)) {
 				Records expectedValues = this.expectedOutputs.get(fileSink);
@@ -554,12 +557,14 @@ public abstract class GenericTestPlan<T extends Record, Records extends GenericT
 				if (expectedValues != null)
 					this.expectedOutputs.put(safeSink, expectedValues);
 				this.actualOutputs.put(safeSink, this.getActualOutput(fileSink));
-				this.getActualOutput(fileSink).fromFile(SequentialInputFormat.class, safeSink.getFilePath());
+				this.getActualOutput(fileSink).load(SequentialInputFormat.class, safeSink.getFilePath());
 
 			} else {
 				wrappedSinks.add(fileSink);
-				this.getActualOutput(fileSink).fromFile(SequentialInputFormat.class, fileSink.getFilePath());
+				this.getActualOutput(fileSink).load(SequentialInputFormat.class,
+					((FileDataSink) fileSink).getFilePath());
 			}
+		}
 
 		return new Plan(wrappedSinks);
 	}
@@ -568,15 +573,16 @@ public abstract class GenericTestPlan<T extends Record, Records extends GenericT
 	 * 
 	 */
 	private void configureSinksAndSources() {
-		for (FileDataSink sink : this.sinks)
+		for (GenericDataSink sink : this.sinks)
 			sink.getParameters().setLong(FileOutputFormat.OUTPUT_STREAM_OPEN_TIMEOUT_KEY, 0);
-		for (FileDataSource source : this.sources)
+		for (GenericDataSource<?> source : this.sources)
 			source.getParameters().setLong(FileInputFormat.INPUT_STREAM_OPEN_TIMEOUT_KEY, 0);
 	}
 
 	/**
 	 * Traverses the plan for all sinks and sources.
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void findSinksAndSources() {
 		for (final Contract contract : this.contracts)
 			contract.accept(new Visitor<Contract>() {
@@ -586,19 +592,24 @@ public abstract class GenericTestPlan<T extends Record, Records extends GenericT
 
 				@Override
 				public boolean preVisit(final Contract visitable) {
-					if (visitable instanceof FileDataSink && !GenericTestPlan.this.sinks.contains(visitable))
-						GenericTestPlan.this.sinks.add((FileDataSink) visitable);
-					if (visitable instanceof FileDataSource && !GenericTestPlan.this.sources.contains(visitable))
-						GenericTestPlan.this.sources.add((FileDataSource) visitable);
+					if (visitable instanceof GenericDataSink && !GenericTestPlan.this.sinks.contains(visitable))
+						GenericTestPlan.this.sinks.add((GenericDataSink) visitable);
+					if (visitable instanceof GenericDataSource<?> && !GenericTestPlan.this.sources.contains(visitable))
+						GenericTestPlan.this.sources.add((GenericDataSource<?>) visitable);
 					return true;
 				}
 			});
 
-		for (FileDataSource source : this.sources)
-			this.getInput(source).fromFile(source.getFormatClass(), source.getFilePath(), source.getParameters());
+		for (GenericDataSource<?> source : this.sources)
+			if (source instanceof FileDataSource)
+				this.getInput(source).load((Class<? extends FileInputFormat>) source.getFormatClass(),
+					((FileDataSource) source).getFilePath(), source.getParameters());
+			else
+				this.getInput(source).load((Class<? extends GenericInputFormat>) source.getFormatClass(),
+					source.getParameters());
 	}
 
-	private List<FileDataSink> getDataSinks() {
+	private List<GenericDataSink> getDataSinks() {
 		return this.sinks;
 	}
 
@@ -607,10 +618,10 @@ public abstract class GenericTestPlan<T extends Record, Records extends GenericT
 	}
 
 	private void initAdhocInputs() throws IOException {
-		for (final FileDataSource source : this.sources) {
+		for (final GenericDataSource<?> source : this.sources) {
 			final Records input = this.getInput(source);
-			if (input.isAdhoc())
-				input.saveToFile(source.getFilePath());
+			if (input.isAdhoc() && source instanceof FileDataSource)
+				input.saveToFile(((FileDataSource) source).getFilePath());
 		}
 	}
 
@@ -652,7 +663,7 @@ public abstract class GenericTestPlan<T extends Record, Records extends GenericT
 	}
 
 	private void validateResults() {
-		for (final FileDataSink sinkContract : this.getDataSinks()) {
+		for (final GenericDataSink sinkContract : this.getDataSinks()) {
 			Records expectedValues = this.expectedOutputs.get(sinkContract);
 			// need a format which is deserializable without configuration
 			if (sinkContract.getFormatClass() == SequentialOutputFormat.class && expectedValues != null
@@ -694,7 +705,8 @@ public abstract class GenericTestPlan<T extends Record, Records extends GenericT
 	 */
 	@SuppressWarnings("unchecked")
 	public static FileDataSource createDefaultSource(final String name) {
-		return new FileDataSource((Class<? extends FileInputFormat<?>>) SequentialInputFormat.class, getTestPlanFile("input"), name);
+		return new FileDataSource((Class<? extends FileInputFormat<?>>) SequentialInputFormat.class,
+			getTestPlanFile("input"), name);
 	}
 
 	static String getTestPlanFile(final String prefix) {

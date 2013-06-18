@@ -18,7 +18,9 @@ package eu.stratosphere.pact.testing;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * Collects other {@link java.io.Closeable}s and closes them once. Instances can be used further after a call to
@@ -27,7 +29,7 @@ import java.util.List;
  * @author Arvid.Heise
  */
 public class ClosableManager implements Closeable {
-	private List<Closeable> closeables = new ArrayList<Closeable>();
+	private Queue<Closeable> closeables = new LinkedList<Closeable>();
 
 	@Override
 	protected void finalize() throws Throwable {
@@ -39,9 +41,9 @@ public class ClosableManager implements Closeable {
 	public synchronized void close() throws IOException {
 		List<IOException> exceptions = null;
 
-		for (Closeable closeable : this.closeables)
+		while(!this.closeables.isEmpty())
 			try {
-				closeable.close();
+				this.closeables.poll().close();
 			} catch (IOException e) {
 				if (exceptions == null)
 					exceptions = new ArrayList<IOException>();

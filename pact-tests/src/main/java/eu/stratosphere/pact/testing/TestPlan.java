@@ -18,7 +18,8 @@ package eu.stratosphere.pact.testing;
 import java.util.Collection;
 
 import eu.stratosphere.pact.common.contract.FileDataSink;
-import eu.stratosphere.pact.common.contract.FileDataSource;
+import eu.stratosphere.pact.common.contract.GenericDataSink;
+import eu.stratosphere.pact.common.contract.GenericDataSource;
 import eu.stratosphere.pact.common.type.PactRecord;
 import eu.stratosphere.pact.common.type.Value;
 import eu.stratosphere.pact.generic.contract.Contract;
@@ -142,7 +143,7 @@ public class TestPlan extends GenericTestPlan<PactRecord, TestRecords> {
 	 * 
 	 */
 	private void inferSchemaOfAdhocInputs() {
-		for (final FileDataSource source : this.getSources()) {
+		for (final GenericDataSource<?> source : this.getSources()) {
 			final TestRecords input = this.getInput(source);
 			if (input.isAdhoc() && input.getTypeConfig() == null)
 				input.inferTypeConfig();
@@ -194,8 +195,23 @@ public class TestPlan extends GenericTestPlan<PactRecord, TestRecords> {
 	 * @return the expected output {@link GenericTestRecords} of the TestPlan associated
 	 *         with the given sink
 	 */
-	public GenericTestRecords<PactRecord> getExpectedOutput(FileDataSink output, Class<? extends Value>[] schema) {
+	public TestRecords getExpectedOutput(GenericDataSink output, Class<? extends Value>[] schema) {
 		return this.getExpectedOutput(output, TestRecords.getPactRecordConfig(schema));
+	}
+	
+	/**
+	 * Returns the expected output {@link GenericTestRecords} with the given schema of the TestPlan
+	 * associated with the given sink. This is the recommended method to set expected
+	 * output records for more complex TestPlans.
+	 * 
+	 * @param sink
+	 *        the sink of which the associated expected output GenericTestRecords
+	 *        should be returned
+	 * @return the expected output {@link GenericTestRecords} of the TestPlan associated
+	 *         with the given sink
+	 */
+	public TestRecords getExpectedOutput(int sink, Class<? extends Value>[] schema) {
+		return this.getExpectedOutput(sink, TestRecords.getPactRecordConfig(schema));
 	}
 
 	public TestRecords getActualOutput(Class<? extends Value>[] schema) {

@@ -18,6 +18,7 @@ package eu.stratosphere.pact.testing;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -25,7 +26,7 @@ import java.util.NoSuchElementException;
 import junit.framework.Assert;
 import eu.stratosphere.nephele.types.Record;
 import eu.stratosphere.nephele.util.StringUtils;
-import eu.stratosphere.pact.generic.io.FileInputFormat;
+import eu.stratosphere.pact.generic.io.InputFormat;
 import eu.stratosphere.pact.generic.types.TypeSerializer;
 
 /**
@@ -38,12 +39,12 @@ import eu.stratosphere.pact.generic.types.TypeSerializer;
  * @param <V>
  *        the type of the values
  */
-public class InputFileIterator<T extends Record> implements Iterator<T>, Closeable {
-	private final List<FileInputFormat<T>> inputFormats = new ArrayList<FileInputFormat<T>>();
+public class InputIterator<T extends Record> implements Iterator<T>, Closeable {
+	private final List<InputFormat<T, ?>> inputFormats = new ArrayList<InputFormat<T, ?>>();
 
-	private final Iterator<FileInputFormat<T>> formatIterator;
+	private final Iterator<InputFormat<T, ?>> formatIterator;
 
-	private FileInputFormat<T> currentFormat;
+	private InputFormat<T, ?> currentFormat;
 
 	private final Object[] buffer = new Object[2];
 
@@ -54,17 +55,16 @@ public class InputFileIterator<T extends Record> implements Iterator<T>, Closeab
 	private final T NO_MORE_PAIR, NOT_LOADED;
 
 	/**
-	 * Initializes InputFileIterator from already configured and opened {@link InputFormat}s.
+	 * Initializes InputIterator from already configured and opened {@link InputFormat}s.
 	 * 
 	 * @param reusePair
 	 *        true if the pair needs only to be created once and is refilled for each subsequent {@link #next()}
 	 * @param inputFormats
 	 *        the inputFormats to wrap
 	 */
-	@SuppressWarnings("unchecked")
-	public InputFileIterator(TypeSerializer<T> serializer, final FileInputFormat<?>[] inputFormats) {
-		for (FileInputFormat<?> inputFormat : inputFormats)
-			this.inputFormats.add((FileInputFormat<T>) inputFormat);
+	public InputIterator(TypeSerializer<T> serializer, final List<? extends InputFormat<T, ?>> inputFormats) {
+		for (InputFormat<T, ?> inputFormat : inputFormats)
+			this.inputFormats.add(inputFormat);
 		this.formatIterator = this.inputFormats.iterator();
 		this.currentFormat = this.formatIterator.next();
 		this.buffer[0] = serializer.createInstance();
@@ -75,8 +75,9 @@ public class InputFileIterator<T extends Record> implements Iterator<T>, Closeab
 		this.loadNextPair();
 	}
 
-	public InputFileIterator(TypeSerializer<T> serializer, final FileInputFormat<T> inputFormats) {
-		this(serializer, new FileInputFormat[] { inputFormats });
+	@SuppressWarnings("unchecked")
+	public InputIterator(TypeSerializer<T> serializer, final InputFormat<T, ?> inputFormats) {
+		this(serializer, Arrays.asList(inputFormats));
 	}
 
 	@Override
@@ -119,7 +120,7 @@ public class InputFileIterator<T extends Record> implements Iterator<T>, Closeab
 
 	@Override
 	public void close() throws IOException {
-		for (final FileInputFormat<T> inputFormat : this.inputFormats)
+		for (final InputFormat<T, ?> inputFormat : this.inputFormats)
 			inputFormat.close();
 	}
 

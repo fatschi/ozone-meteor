@@ -35,6 +35,7 @@ import eu.stratosphere.nephele.util.StringUtils;
 import eu.stratosphere.pact.common.util.MutableObjectIterator;
 import eu.stratosphere.pact.generic.io.FileInputFormat;
 import eu.stratosphere.pact.generic.io.FormatUtil;
+import eu.stratosphere.pact.generic.io.GenericInputFormat;
 import eu.stratosphere.pact.generic.io.SequentialOutputFormat;
 import eu.stratosphere.pact.generic.types.TypeComparator;
 import eu.stratosphere.pact.generic.types.TypePairComparator;
@@ -69,11 +70,11 @@ import eu.stratosphere.pact.runtime.sort.UnilateralSortMerger;
  */
 public class GenericTestRecords<T extends Record> implements Closeable, Iterable<T> {
 	private final class TestRecordReader implements MutableObjectIterator<T> {
-		private final InputFileIterator<T> inputFileIterator;
+		private final Iterator<T> inputFileIterator;
 
 		private TypeSerializer<T> typeSerializer = GenericTestRecords.this.typeConfig.getTypeSerializer();
 
-		private TestRecordReader(final InputFileIterator<T> inputFileIterator) {
+		private TestRecordReader(final Iterator<T> inputFileIterator) {
 			this.inputFileIterator = inputFileIterator;
 		}
 
@@ -96,7 +97,7 @@ public class GenericTestRecords<T extends Record> implements Closeable, Iterable
 
 	private Configuration configuration;
 
-	private Class<? extends FileInputFormat<T>> inputFormatClass;
+	private Class<? extends GenericInputFormat<T>> inputFormatClass;
 
 	private final List<T> records = new ArrayList<T>();
 
@@ -220,7 +221,7 @@ public class GenericTestRecords<T extends Record> implements Closeable, Iterable
 	/**
 	 * Uses {@link UnilateralSortMerger} to sort the files of the {@link SplitInputIterator}.
 	 */
-	private Iterator<T> createSortedIterator(final InputFileIterator<T> inputFileIterator) {
+	private Iterator<T> createSortedIterator(final Iterator<T> inputFileIterator) {
 		int memSize = 10;
 
 		try {
@@ -320,9 +321,9 @@ public class GenericTestRecords<T extends Record> implements Closeable, Iterable
 	 * @return this
 	 */
 	@SuppressWarnings("rawtypes")
-	public GenericTestRecords<T> fromFile(final Class<? extends FileInputFormat> inputFormatClass,
+	public GenericTestRecords<T> load(final Class<? extends FileInputFormat> inputFormatClass,
 			final String file) {
-		this.fromFile(inputFormatClass, file, new Configuration());
+		this.load(inputFormatClass, file, new Configuration());
 		return this;
 	}
 
@@ -338,11 +339,32 @@ public class GenericTestRecords<T extends Record> implements Closeable, Iterable
 	 * @return this
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public GenericTestRecords<T> fromFile(final Class<? extends FileInputFormat> inputFormatClass,
-			final String file,
-			final Configuration configuration) {
+	public GenericTestRecords<T> load(final Class<? extends FileInputFormat> inputFormatClass,
+			final String file, final Configuration configuration) {
 		this.path = file;
-		this.inputFormatClass = (Class<? extends FileInputFormat<T>>) inputFormatClass;
+		this.inputFormatClass = (Class) inputFormatClass;
+		this.configuration = configuration;
+		this.setEmpty(false);
+		this.records.clear();
+		return this;
+	}
+
+	/**
+	 * Initializes this {@link TestPairs} from the given file.
+	 * 
+	 * @param inputFormatClass
+	 *        the class of the {@link FileInputFormat}
+	 * @param file
+	 *        the path to the file, can be relative
+	 * @param configuration
+	 *        the configuration for the {@link FileInputFormat}.
+	 * @return this
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public GenericTestRecords<T> load(final Class<? extends GenericInputFormat> inputFormatClass,
+			final Configuration configuration) {
+		this.path = null;
+		this.inputFormatClass = (Class<? extends GenericInputFormat<T>>) inputFormatClass;
 		this.configuration = configuration;
 		this.setEmpty(false);
 		this.records.clear();
@@ -383,16 +405,27 @@ public class GenericTestRecords<T extends Record> implements Closeable, Iterable
 
 	@Override
 	public Iterator<T> iterator() {
-		if (this.isEmpty())
+		if (this.isEmpty() || !this.isInitialized())
 			return this.EMPTY_ITERATOR;
 
 		if (this.typeConfig == null)
 			throw new IllegalArgumentException(
 				"No type configuration given. Please set default config for the TestPlan with TestPlan#setTypeConfig or specify them when accessing the inputs/outputs");
 
-		if (!this.isAdhoc() && this.inputFormatClass != null) {
+		if (this.isAdhoc()) {
+			final TypePairComparator<T, T> typePairComparator = this.typeConfig.getTypePairComparator();
+			Collections.sort(this.records, new Comparator<T>() {
+				@Override
+				public int compare(T o1, T o2) {
+					typePairComparator.setReference(o2);
+					return typePairComparator.compareToReference(o1);
+				}
+			});
+			return this.records.iterator();
+		}
 
-			final InputFileIterator<T> inputFileIterator = this.getInputFileIterator();
+		if (this.path != null) {
+			final InputIterator<T> inputFileIterator = this.getInputFileIterator();
 
 			if (!inputFileIterator.hasNext())
 				return inputFileIterator;
@@ -400,23 +433,23 @@ public class GenericTestRecords<T extends Record> implements Closeable, Iterable
 			return this.createSortedIterator(inputFileIterator);
 		}
 
-		final TypePairComparator<T, T> typePairComparator = this.typeConfig.getTypePairComparator();
-		Collections.sort(this.records, new Comparator<T>() {
-			@Override
-			public int compare(T o1, T o2) {
-				typePairComparator.setReference(o2);
-				return typePairComparator.compareToReference(o1);
-			}
-		});
-		return this.records.iterator();
+		try {
+			return this.createSortedIterator(
+				new InputIterator<T>(this.typeConfig.getTypeSerializer(),
+					FormatUtil.openInput(this.inputFormatClass, this.configuration)));
+		} catch (IOException e) {
+			Assert.fail("creating input format " + StringUtils.stringifyException(e));
+			return null;
+		}
 	}
 
-	protected InputFileIterator<T> getInputFileIterator() {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	protected InputIterator<T> getInputFileIterator() {
 
-		final InputFileIterator<T> inputFileIterator;
+		final InputIterator<T> inputFileIterator;
 		try {
-			inputFileIterator = new InputFileIterator<T>(this.typeConfig.getTypeSerializer(),
-				FormatUtil.openAllInputs(this.inputFormatClass, this.path, this.configuration));
+			inputFileIterator = new InputIterator<T>(this.typeConfig.getTypeSerializer(),
+				FormatUtil.openAllInputs((Class) this.inputFormatClass, this.path, this.configuration));
 		} catch (final IOException e) {
 			Assert.fail("reading values from " + this.path + ": " + StringUtils.stringifyException(e));
 			return null;

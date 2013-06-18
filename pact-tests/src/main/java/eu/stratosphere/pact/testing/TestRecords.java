@@ -118,6 +118,34 @@ public class TestRecords extends GenericTestRecords<PactRecord> {
 	public TestRecords(Class<? extends Value> firstEntry, Class<?>... remainingEntries) {
 		super(getPactRecordConfig(firstEntry, remainingEntries));
 	}
+	
+	public TestRecords(Class<? extends Value>[] schema) {
+		super(getPactRecordConfig(schema));
+	}
+	
+	/* (non-Javadoc)
+	 * @see eu.stratosphere.pact.testing.GenericTestRecords#add(eu.stratosphere.pact.testing.GenericTestRecords)
+	 */
+	@Override
+	public TestRecords add(GenericTestRecords<PactRecord> records) {
+		return (TestRecords) super.add(records);
+	}
+	
+	/* (non-Javadoc)
+	 * @see eu.stratosphere.pact.testing.GenericTestRecords#add(java.lang.Iterable)
+	 */
+	@Override
+	public TestRecords add(Iterable<? extends PactRecord> records) {
+		return (TestRecords) super.add(records);
+	}
+	
+	/* (non-Javadoc)
+	 * @see eu.stratosphere.pact.testing.GenericTestRecords#add(T[])
+	 */
+	@Override
+	public TestRecords add(PactRecord... records) {
+		return (TestRecords) super.add(records);
+	}
 
 	public static final TypeConfig<PactRecord> getPactRecordConfig(Class<? extends Value> firstEntry,
 			Class<?>... remainingEntries) {
