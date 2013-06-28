@@ -12,28 +12,22 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.sopremo.serialization;
+package eu.stratosphere.sopremo.packages;
 
-import java.util.Set;
+import java.util.List;
 
-import eu.stratosphere.sopremo.ISopremoType;
-import eu.stratosphere.sopremo.expressions.EvaluationExpression;
-import eu.stratosphere.sopremo.expressions.UnevaluableExpression;
+import eu.stratosphere.sopremo.type.IJsonNode;
 
 /**
+ * Registry that manages {@link SopremoFunction}s.
+ * 
  * @author Arvid Heise
  */
-public interface SchemaFactory extends ISopremoType {
-	public final static EvaluationExpression UNKNOWN = new UnevaluableExpression("Unknown return type");
-	
-	/**
-	 * This method takes keyExpressions in form of EvaluationExpressions and tries to give back a matching
-	 * {@link Schema}
-	 * 
-	 * @param keyExpressions
-	 *        the Expressions, from which a Schema shall be created
-	 * @return {@link Schema}, corresponding to the <code>keyExpressions</code>
-	 */
-	Schema create(Set<EvaluationExpression> keyExpressions, Set<EvaluationExpression> resultProjections);
+public interface ITypeRegistry extends IRegistry<Class<? extends IJsonNode>> {
+	public List<Class<? extends IJsonNode>> getTypes();
 
+	/**
+	 * @param type
+	 */
+	void put(Class<? extends IJsonNode> type);
 }

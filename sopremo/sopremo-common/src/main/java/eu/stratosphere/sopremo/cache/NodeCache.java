@@ -18,7 +18,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 import eu.stratosphere.sopremo.type.IJsonNode;
-import eu.stratosphere.util.reflect.ReflectUtil;
+import eu.stratosphere.sopremo.type.JsonUtil;
 
 /**
  * @author Arvid Heise
@@ -33,7 +33,7 @@ public final class NodeCache implements ISopremoCache {
 		final IJsonNode cachedValue = this.classCache.get(type);
 		if (cachedValue != null)
 			return (T) cachedValue;
-		final IJsonNode newValue = ReflectUtil.newInstance(type);
+		final IJsonNode newValue = JsonUtil.instantiate(type);
 		this.classCache.put(type, newValue);
 		return (T) newValue;
 	}

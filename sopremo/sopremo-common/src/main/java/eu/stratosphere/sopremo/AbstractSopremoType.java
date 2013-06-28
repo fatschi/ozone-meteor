@@ -15,8 +15,12 @@
 package eu.stratosphere.sopremo;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.esotericsoftware.kryo.Kryo;
+
+import eu.stratosphere.sopremo.packages.ITypeRegistry;
+import eu.stratosphere.sopremo.type.IJsonNode;
 
 /**
  * Provides basic implementations of the required methods of {@link SopremoType}
@@ -33,36 +37,18 @@ public abstract class AbstractSopremoType implements ISopremoType {
 		return toString(this);
 	}
 
-	private final static ThreadLocal<Kryo> CloneHelper = new ThreadLocal<Kryo>() {
-		/*
-		 * (non-Javadoc)
-		 * @see java.lang.ThreadLocal#initialValue()
-		 */
-		@Override
-		protected Kryo initialValue() {
-			return KryoFactory.getKryo();
-		}
-	};
-
 	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
 	public AbstractSopremoType clone() {
-		return getKryo().copy(this);
+		return SopremoEnvironment.getInstance().getEvaluationContext().getKryo().copy(this);
 		// kryo 2.20 makes fancy stuff such as caching of clones - we need more control
 		// if (this instanceof KryoCopyable<?>)
 		// return ((KryoCopyable<AbstractSopremoType>) this).copy(CloneHelper);
 		// final Serializer<AbstractSopremoType> serializer = CloneHelper.getSerializer(getClass());
 		// return serializer.copy(CloneHelper, this);
-	}
-
-	/**
-	 * Unreliable API - subject to change
-	 */
-	protected Kryo getKryo() {
-		return CloneHelper.get();
 	}
 
 	protected void checkCopyType(AbstractSopremoType copy) {
@@ -76,7 +62,7 @@ public abstract class AbstractSopremoType implements ISopremoType {
 	 * @see java.lang.Object#clone()
 	 */
 	public AbstractSopremoType shallowClone() {
-		return getKryo().copyShallow(this);
+		return SopremoEnvironment.getInstance().getEvaluationContext().getKryo().copyShallow(this);
 	}
 
 	@SuppressWarnings("unchecked")

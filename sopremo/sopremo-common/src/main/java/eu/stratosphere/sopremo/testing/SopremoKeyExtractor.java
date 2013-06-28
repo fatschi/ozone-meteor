@@ -12,55 +12,40 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.sopremo.serialization;
+package eu.stratosphere.sopremo.testing;
 
-import java.io.DataOutput;
-import java.io.IOException;
-import java.io.OutputStream;
+import eu.stratosphere.pact.testing.KeyExtractor;
+import eu.stratosphere.sopremo.expressions.EvaluationExpression;
+import eu.stratosphere.sopremo.serialization.SopremoRecord;
 
 /**
  * @author arv
  */
-public class DataOutputToOutputStreamAdapter extends OutputStream {
-	private DataOutput dataOutput;
+public class SopremoKeyExtractor implements KeyExtractor<SopremoRecord> {
+	private final EvaluationExpression[] expressions;
 
-	/**
-	 * Sets the dataOutput to the specified value.
-	 * 
-	 * @param dataOutput
-	 *        the dataOutput to set
-	 */
-	public void setDataOutput(DataOutput dataOutput) {
-		if (dataOutput == null)
-			throw new NullPointerException("dataOutput must not be null");
-
-		this.dataOutput = dataOutput;
+	public SopremoKeyExtractor(EvaluationExpression[] expressions) {
+		this.expressions = expressions;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see java.io.OutputStream#write(int)
+	 * @see eu.stratosphere.pact.testing.KeyExtractor#getKeySize()
 	 */
 	@Override
-	public void write(int b) throws IOException {
-		this.dataOutput.writeByte(b);
+	public int getKeySize() {
+		return this.expressions.length;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see java.io.OutputStream#write(byte[])
+	 * @see eu.stratosphere.pact.testing.KeyExtractor#fill(java.lang.Comparable<?>[],
+	 * eu.stratosphere.nephele.types.Record)
 	 */
 	@Override
-	public void write(byte[] b) throws IOException {
-		this.dataOutput.write(b);
+	public void fill(Comparable<?>[] keys, SopremoRecord record) {
+		for (int index = 0; index < keys.length; index++)
+			keys[index] = this.expressions[index].evaluate(record.getNode());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see java.io.OutputStream#write(byte[], int, int)
-	 */
-	@Override
-	public void write(byte[] b, int off, int len) throws IOException {
-		this.dataOutput.write(b, off, len);
-	}
 }

@@ -1,0 +1,9 @@
+diff a/sopremo/sopremo-common/src/test/java/eu/stratosphere/sopremo/type/ArrayNodeBaseTest.java b/sopremo/sopremo-common/src/test/java/eu/stratosphere/sopremo/type/ArrayNodeBaseTest.java	(rejected hunks)
+@@ -13,7 +13,6 @@ import org.junit.Test;
+ import com.google.common.collect.Lists;
+ 
+ import eu.stratosphere.pact.testing.AssertUtil;
+-import eu.stratosphere.pact.testing.Equaler;
+ 
+ @Ignore
+ public abstract class ArrayNodeBaseTest<T extends IArrayNode<IJsonNode>> extends JsonNodeTest<T> {

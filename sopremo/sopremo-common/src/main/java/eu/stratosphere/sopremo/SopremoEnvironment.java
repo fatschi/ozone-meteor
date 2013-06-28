@@ -17,45 +17,45 @@ package eu.stratosphere.sopremo;
 /**
  * @author Arvid Heise
  */
-public class SopremoRuntime {
+public class SopremoEnvironment {
 	/**
 	 * 
 	 */
-	private static final ThreadLocal<SopremoRuntime> INSTANCE = new ThreadLocal<SopremoRuntime>() {
+	private static final ThreadLocal<SopremoEnvironment> INSTANCE = new ThreadLocal<SopremoEnvironment>() {
 		@Override
-		protected SopremoRuntime initialValue() {
-			return new SopremoRuntime();
+		protected SopremoEnvironment initialValue() {
+			return new SopremoEnvironment();
 		};
 	};
 
-	private EvaluationContext currentEvaluationContext = new EvaluationContext();
+	private EvaluationContext evaluationContext = new EvaluationContext();
 
 	private ClassLoader classLoader = getClass().getClassLoader();
 	
-	public static SopremoRuntime getInstance() {
+	public static SopremoEnvironment getInstance() {
 		return INSTANCE.get();
 	}
 
 	/**
-	 * Returns the currentEvaluationContext.
+	 * Returns the evaluationContext.
 	 * 
-	 * @return the currentEvaluationContext
+	 * @return the evaluationContext
 	 */
-	public EvaluationContext getCurrentEvaluationContext() {
-		return this.currentEvaluationContext;
+	public EvaluationContext getEvaluationContext() {
+		return this.evaluationContext;
 	}
 
 	/**
-	 * Sets the currentEvaluationContext to the specified value.
+	 * Sets the evaluationContext to the specified value.
 	 * 
-	 * @param currentEvaluationContext
-	 *        the currentEvaluationContext to set
+	 * @param evaluationContext
+	 *        the evaluationContext to set
 	 */
-	public void setCurrentEvaluationContext(EvaluationContext currentEvaluationContext) {
+	public void setEvaluationContext(EvaluationContext currentEvaluationContext) {
 		if (currentEvaluationContext == null)
-			throw new NullPointerException("currentEvaluationContext must not be null");
+			throw new NullPointerException("evaluationContext must not be null");
 
-		this.currentEvaluationContext = currentEvaluationContext;
+		this.evaluationContext = currentEvaluationContext;
 	}
 
 	/**

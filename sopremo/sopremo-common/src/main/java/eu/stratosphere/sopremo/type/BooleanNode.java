@@ -151,17 +151,6 @@ public class BooleanNode extends AbstractJsonNode implements IPrimitiveNode {
 	public void clear() {
 	}
 
-	@Override
-	public int getMaxNormalizedKeyLen() {
-		return 1;
-	}
-
-	@Override
-	public void copyNormalizedKey(final byte[] target, final int offset, final int len) {
-		target[offset] = (byte) (value ? 1 : 0);
-		this.fillWithZero(target, offset + 1, offset + len);
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * @see eu.stratosphere.sopremo.ISopremoType#toString(java.lang.StringBuilder)

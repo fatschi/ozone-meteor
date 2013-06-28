@@ -10,6 +10,7 @@ import eu.stratosphere.sopremo.expressions.ExpressionUtil;
 import eu.stratosphere.sopremo.expressions.InputSelection;
 import eu.stratosphere.sopremo.expressions.ObjectAccess;
 import eu.stratosphere.sopremo.expressions.PathSegmentExpression;
+import eu.stratosphere.util.reflect.ReflectUtil;
 
 /**
  * Provides a set of utility functions and objects to handle json data.
@@ -146,6 +147,14 @@ public class JsonUtil {
 		for (int index = 0; index < fields.length; index += 2)
 			objectNode.put(fields[index].toString(), JsonUtil.OBJECT_MAPPER.valueToTree(fields[index + 1]));
 		return objectNode;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T extends IJsonNode> T instantiate(final Class<? extends T> type) {
+		final DefaultImplementation annotation = type.getAnnotation(DefaultImplementation.class);
+		if (annotation != null)
+			return (T) ReflectUtil.newInstance(annotation.value());
+		return ReflectUtil.newInstance(type);
 	}
 
 	public static IJsonNode createValueNode(final Object value) {
