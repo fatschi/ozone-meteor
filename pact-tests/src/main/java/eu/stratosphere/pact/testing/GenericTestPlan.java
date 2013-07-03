@@ -703,9 +703,9 @@ public abstract class GenericTestPlan<T extends Record, Records extends GenericT
 	 *        the name of the source
 	 * @return the created source
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static FileDataSource createDefaultSource(final String name) {
-		return new FileDataSource((Class<? extends FileInputFormat<?>>) SequentialInputFormat.class,
+		return new FileDataSource((Class) SequentialInputFormat.class, 
 			getTestPlanFile("input"), name);
 	}
 
