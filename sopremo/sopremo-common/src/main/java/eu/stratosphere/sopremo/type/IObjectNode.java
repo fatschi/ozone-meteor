@@ -24,7 +24,6 @@ import java.util.SortedSet;
  * @author Michael Hopstock
  * @author Tommy Neubert
  */
-@DefaultImplementation(ObjectNode.class)
 public interface IObjectNode extends IJsonNode, Iterable<Entry<String, IJsonNode>> {
 
 	/**

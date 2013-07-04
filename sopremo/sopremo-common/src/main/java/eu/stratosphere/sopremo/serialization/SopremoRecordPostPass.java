@@ -14,6 +14,8 @@
  **********************************************************************************************************************/
 package eu.stratosphere.sopremo.serialization;
 
+import java.util.Iterator;
+
 import com.google.common.collect.Iterables;
 
 import eu.stratosphere.nephele.configuration.Configuration;
@@ -31,6 +33,7 @@ import eu.stratosphere.pact.compiler.plan.candidate.PlanNode;
 import eu.stratosphere.pact.compiler.plan.candidate.SingleInputPlanNode;
 import eu.stratosphere.pact.compiler.plan.candidate.SinkPlanNode;
 import eu.stratosphere.pact.compiler.plan.candidate.SourcePlanNode;
+import eu.stratosphere.pact.compiler.plan.candidate.UnionPlanNode;
 import eu.stratosphere.pact.compiler.postpass.ConflictingFieldTypeInfoException;
 import eu.stratosphere.pact.compiler.postpass.GenericRecordPostPass;
 import eu.stratosphere.pact.compiler.postpass.MissingFieldTypeInfoException;
@@ -83,7 +86,7 @@ public class SopremoRecordPostPass implements OptimizerPostPass {
 			if (sn.getDriverStrategy().requiresComparator()) {
 				sn.setComparator(createComparator(sn.getKeys(), sn.getSortOrders(), layout));
 			}
-			processChannel(layout, sn.getInput());
+			// processChannel(layout, sn.getInput());
 		} else if (node instanceof DualInputPlanNode) {
 			DualInputPlanNode dn = (DualInputPlanNode) node;
 			// parameterize the node's driver strategy
@@ -92,11 +95,15 @@ public class SopremoRecordPostPass implements OptimizerPostPass {
 				dn.setComparator2(createComparator(dn.getKeysForInput2(), dn.getSortOrders(), layout));
 				dn.setPairComparator(SopremoRecordPairComparatorFactory.get());
 			}
-			processChannel(layout, dn.getInput1());
-			processChannel(layout, dn.getInput2());
+			// processChannel(layout, dn.getInput1());
+			// processChannel(layout, dn.getInput2());
 		} else if (node instanceof SourcePlanNode) {
 			((SourcePlanNode) node).setSerializer(new SopremoRecordSerializerFactory(layout));
 		}
+
+		final Iterator<Channel> inputs = node.getInputs();
+		while (inputs.hasNext())
+			processChannel(layout, inputs.next());
 	}
 
 	private void processChannel(SopremoRecordLayout layout, Channel channel) {
@@ -108,53 +115,6 @@ public class SopremoRecordPostPass implements OptimizerPostPass {
 			channel.setShipStrategyComparator(createComparator(channel.getShipStrategyKeys(),
 				channel.getShipStrategySortOrder(), layout));
 	}
-
-	//
-	// @Override
-	// protected void getSingleInputNodeSchema(SingleInputPlanNode node, SparseNodeSchema schema)
-	// throws CompilerPostPassException, ConflictingFieldTypeInfoException {
-	// // check that we got the right types
-	// SingleInputContract<?> contract = node.getSingleInputNode().getPactContract();
-	//
-	// // add the information to the schema
-	// int[] localPositions = contract.getKeyColumns(0);
-	// final SopremoRecordLayout layout = getLayout(contract.getParameters());
-	// for (int i = 0; i < localPositions.length; i++) {
-	// schema.addType(localPositions[i], layout.getExpression(i));
-	// }
-	// }
-	//
-	// @Override
-	// protected void getDualInputNodeSchema(DualInputPlanNode node, SparseNodeSchema input1Schema,
-	// SparseNodeSchema input2Schema)
-	// throws CompilerPostPassException, ConflictingFieldTypeInfoException
-	// {
-	// // add the nodes local information. this automatically consistency checks
-	// DualInputContract<?> contract = node.getTwoInputNode().getPactContract();
-	//
-	// int[] localPositions1 = contract.getKeyColumns(0);
-	// int[] localPositions2 = contract.getKeyColumns(1);
-	//
-	// if (localPositions1.length != localPositions2.length) {
-	// throw new CompilerException(
-	// "Error: The keys for the first and second input have a different number of fields.");
-	// }
-	//
-	// for (int i = 0; i < localPositions1.length; i++) {
-	// input1Schema.addType(localPositions1[i], null);
-	// }
-	// for (int i = 0; i < localPositions2.length; i++) {
-	// input2Schema.addType(localPositions2[i], null);
-	// }
-	// }
-	//
-	// private void addOrderingToSchema(Ordering o, SopremoRecordLayout layout, SparseNodeSchema schema) throws
-	// ConflictingFieldTypeInfoException {
-	// for (int i = 0; i < o.getNumberOfFields(); i++) {
-	// Integer pos = o.getFieldNumber(i);
-	// schema.addType(pos, layout.getExpression(pos));
-	// }
-	// }
 
 	private SopremoRecordComparatorFactory createComparator(FieldList fields, boolean[] directions,
 			SopremoRecordLayout layout) {

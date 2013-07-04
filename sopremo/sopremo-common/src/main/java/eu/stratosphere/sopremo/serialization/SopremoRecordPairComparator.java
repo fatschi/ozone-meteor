@@ -46,8 +46,8 @@ public class SopremoRecordPairComparator extends TypePairComparator<SopremoRecor
 		this.nodeCache2 = new NodeCache[this.numKeys];
 
 		for (int index = 0; index < this.numKeys; index++) {
-			this.nodeCache1[index] = new NodeCache();
-			this.nodeCache2[index] = new NodeCache();
+			this.nodeCache1[index] = new NodeCache(CachingNodeFactory.getInstance());
+			this.nodeCache2[index] = new NodeCache(CachingNodeFactory.getInstance());
 		}
 	}
 

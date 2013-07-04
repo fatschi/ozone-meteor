@@ -15,6 +15,8 @@
 
 package eu.stratosphere.sopremo.serialization;
 
+import java.util.Arrays;
+
 import eu.stratosphere.nephele.configuration.Configuration;
 import eu.stratosphere.pact.generic.types.TypeComparator;
 import eu.stratosphere.pact.generic.types.TypeComparatorFactory;
@@ -36,12 +38,34 @@ public class SopremoRecordComparatorFactory implements TypeComparatorFactory<Sop
 		this.keyExpressions = keyExpressions;
 		this.ascending = ascending;
 	}
-	
+
 	/**
 	 * Initializes SopremoRecordComparatorFactory.
-	 *
 	 */
 	public SopremoRecordComparatorFactory() {
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(this.ascending);
+		result = prime * result + Arrays.hashCode(this.keyExpressions);
+		result = prime * result + this.layout.hashCode();
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SopremoRecordComparatorFactory other = (SopremoRecordComparatorFactory) obj;
+		return Arrays.equals(this.ascending, other.ascending) && Arrays.equals(this.keyExpressions, other.keyExpressions) &&
+			this.layout.equals(other.layout);
 	}
 
 	/*

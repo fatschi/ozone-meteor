@@ -149,14 +149,6 @@ public class JsonUtil {
 		return objectNode;
 	}
 
-	@SuppressWarnings("unchecked")
-	public static <T extends IJsonNode> T instantiate(final Class<? extends T> type) {
-		final DefaultImplementation annotation = type.getAnnotation(DefaultImplementation.class);
-		if (annotation != null)
-			return (T) ReflectUtil.newInstance(annotation.value());
-		return ReflectUtil.newInstance(type);
-	}
-
 	public static IJsonNode createValueNode(final Object value) {
 		return JsonUtil.OBJECT_MAPPER.valueToTree(value);
 	}

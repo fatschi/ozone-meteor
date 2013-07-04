@@ -101,6 +101,7 @@ public class SopremoRecordTest extends EqualCloneTest<SopremoRecord> {
 	 */
 	private SopremoRecord serializeAndDeserialize(SopremoRecord sopremoRecord) throws IOException {
 		Kryo kryo = new Kryo();
+		kryo.setReferences(false);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		Output output = new Output(baos);
 		kryo.writeObject(output, sopremoRecord);

@@ -23,7 +23,6 @@ import eu.stratosphere.sopremo.cache.ArrayCache;
  * @author Tommy Neubert
  * @author Arvid Heise
  */
-@DefaultImplementation(ArrayNode.class)
 public interface IArrayNode<T extends IJsonNode> extends IStreamNode<T> {
 
 	/**

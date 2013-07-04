@@ -82,7 +82,7 @@ public final class SopremoRecord extends AbstractSopremoType implements ISopremo
 		}
 	});
 
-	private final transient NodeCache nodeCache = new NodeCache();
+	private final transient NodeCache nodeCache = new NodeCache(CachingNodeFactory.getInstance());
 
 	private transient IJsonNode node;
 

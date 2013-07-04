@@ -122,7 +122,7 @@ public class BooleanNode extends AbstractJsonNode implements IPrimitiveNode {
 			return true;
 		if (obj == null)
 			return false;
-		if (this.getClass() != obj.getClass())
+		if (!(obj instanceof BooleanNode))
 			return false;
 
 		final BooleanNode other = (BooleanNode) obj;

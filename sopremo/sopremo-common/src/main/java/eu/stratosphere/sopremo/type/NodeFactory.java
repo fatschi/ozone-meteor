@@ -14,16 +14,11 @@
  **********************************************************************************************************************/
 package eu.stratosphere.sopremo.type;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 
 /**
  * @author arv
+ *
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface DefaultImplementation {
-	Class<?> value();
+public interface NodeFactory {
+	public <T extends IJsonNode> T instantiate(Class<T> interfaceType);
 }

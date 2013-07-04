@@ -131,6 +131,7 @@ public class TwoSourceJoinTest extends SopremoOperatorTestBase<TwoSourceJoin> {
 				"java.sun.com/javase/6/docs/api/").
 			addObject("name", "Jane Doe", "password", "qwertyui", "id", 2, "userid", 2, "url", "www.cnn.com");
 
+		sopremoPlan.trace();
 		sopremoPlan.run();
 	}
 

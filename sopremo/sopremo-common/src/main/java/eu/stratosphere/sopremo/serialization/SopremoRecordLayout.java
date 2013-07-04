@@ -53,8 +53,9 @@ public class SopremoRecordLayout extends AbstractSopremoType {
 		public void write(Kryo kryo, Output output, SopremoRecordLayout object) {
 			kryo.writeObject(output, object.getKeyExpressions());
 		}
-		
-		/* (non-Javadoc)
+
+		/*
+		 * (non-Javadoc)
 		 * @see com.esotericsoftware.kryo.Serializer#copy(com.esotericsoftware.kryo.Kryo, java.lang.Object)
 		 */
 		@Override
@@ -96,12 +97,17 @@ public class SopremoRecordLayout extends AbstractSopremoType {
 		if (expression instanceof ArrayAccess && ((ArrayAccess) expression).isFixedSize())
 			for (ArrayAccess arrayAccess : ((ArrayAccess) expression).decompose())
 				indices.add(this.indexedDirectDataExpression.getInt(arrayAccess));
-		else
-			indices.add(this.indexedDirectDataExpression.getInt(expression));
+		else {
+			int index = this.indexedDirectDataExpression.getInt(expression);
+			if (index == -1)
+				index = this.getNumDirectDataKeys() + this.indexedCalculatedKeyExpressions.getInt(expression);
+			indices.add(index);
+		}
 		return indices;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see eu.stratosphere.sopremo.ISopremoType#appendAsString(java.lang.Appendable)
 	 */
 	@Override
@@ -109,9 +115,7 @@ public class SopremoRecordLayout extends AbstractSopremoType {
 		AppendUtil.append(appendable, this.directDataExpression);
 		AppendUtil.append(appendable, this.calculatedKeyExpressions);
 	}
-	
-	
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -130,7 +134,8 @@ public class SopremoRecordLayout extends AbstractSopremoType {
 		if (getClass() != obj.getClass())
 			return false;
 		SopremoRecordLayout other = (SopremoRecordLayout) obj;
-		return Arrays.equals(this.directDataExpression, other.directDataExpression) && Arrays.equals(this.calculatedKeyExpressions, other.calculatedKeyExpressions);
+		return Arrays.equals(this.directDataExpression, other.directDataExpression) &&
+			Arrays.equals(this.calculatedKeyExpressions, other.calculatedKeyExpressions);
 	}
 
 	/**
@@ -177,8 +182,8 @@ public class SopremoRecordLayout extends AbstractSopremoType {
 	 * @return the keyExpressions
 	 */
 	public List<EvaluationExpression> getKeyExpressions() {
-		return Lists.newArrayList(Iterables.concat(this.indexedDirectDataExpression.keySet(),
-			this.indexedCalculatedKeyExpressions.keySet()));
+		return Lists.newArrayList(Iterables.concat(Arrays.asList(this.directDataExpression),
+			Arrays.asList(this.calculatedKeyExpressions)));
 	}
 
 	/**
@@ -197,7 +202,7 @@ public class SopremoRecordLayout extends AbstractSopremoType {
 		index(directDataExpression, calculatedKeyExpressions);
 	}
 
-	public void index(EvaluationExpression[] directDataExpression, EvaluationExpression[] calculatedKeyExpressions) {
+	private void index(EvaluationExpression[] directDataExpression, EvaluationExpression[] calculatedKeyExpressions) {
 		this.indexedDirectDataExpression.defaultReturnValue(UNKNOWN_KEY_EXPRESSION);
 		this.indexedCalculatedKeyExpressions.defaultReturnValue(UNKNOWN_KEY_EXPRESSION);
 
@@ -227,7 +232,7 @@ public class SopremoRecordLayout extends AbstractSopremoType {
 	public static SopremoRecordLayout create(EvaluationExpression keyExpressions) {
 		return create(Arrays.asList(keyExpressions));
 	}
-	
+
 	public static SopremoRecordLayout create(EvaluationExpression... keyExpressions) {
 		return create(Arrays.asList(keyExpressions));
 	}

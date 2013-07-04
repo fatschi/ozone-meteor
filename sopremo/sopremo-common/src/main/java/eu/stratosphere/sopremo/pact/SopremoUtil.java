@@ -285,8 +285,7 @@ public class SopremoUtil {
 		@Override
 		protected Kryo initialValue() {
 			final Kryo kryo = new Kryo();
-			kryo.setReferences(true);
-			kryo.setAutoReset(true);
+			kryo.setReferences(false);
 			return kryo;
 		};
 	};
@@ -306,9 +305,14 @@ public class SopremoUtil {
 		if (stringRepresentation == null)
 			return defaultValue;
 		Input input = new Input(stringRepresentation.getBytes(BINARY_CHARSET));
-		final Kryo kryo = Serialization.get();
+		final Kryo kryo = getKryo();
 		kryo.setClassLoader(SopremoEnvironment.getInstance().getClassLoader());
 		return (T) kryo.readClassAndObject(input);
+	}
+
+	public static Kryo getKryo() {
+		final Kryo kryo = Serialization.get();
+		return kryo;
 	}
 
 	public static EvaluationContext getEvaluationContext(Configuration config) {
@@ -340,7 +344,7 @@ public class SopremoUtil {
 	public static void setObject(Configuration config, String keyName, Object object) {
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		final Output output = new Output(baos);
-		final Kryo kryo = Serialization.get();
+		final Kryo kryo = getKryo();
 		kryo.reset();
 		kryo.writeClassAndObject(output, object);
 		output.close();

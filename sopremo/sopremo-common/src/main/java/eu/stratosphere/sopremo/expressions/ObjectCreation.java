@@ -201,7 +201,7 @@ public class ObjectCreation extends EvaluationExpression {
 		public IJsonNode evaluate(final IJsonNode node) {
 			this.result.clear();
 			for (final IJsonNode jsonNode : (IArrayNode<?>) node)
-				if (!(jsonNode != NullNode.getInstance()))
+				if (jsonNode != NullNode.getInstance())
 					this.result.putAll((IObjectNode) jsonNode);
 			return this.result;
 		}

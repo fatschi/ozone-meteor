@@ -19,8 +19,6 @@ import java.io.IOException;
 
 import eu.stratosphere.nephele.services.memorymanager.DataInputView;
 import eu.stratosphere.nephele.services.memorymanager.DataOutputView;
-import eu.stratosphere.pact.common.type.KeyFieldOutOfBoundsException;
-import eu.stratosphere.pact.common.type.NullKeyFieldException;
 import eu.stratosphere.pact.generic.types.TypeComparator;
 import eu.stratosphere.sopremo.cache.NodeCache;
 import eu.stratosphere.sopremo.expressions.EvaluationExpression;
@@ -61,8 +59,8 @@ public final class SopremoRecordComparator extends TypeComparator<SopremoRecord>
 		this.nodeCache1 = new NodeCache[this.keyExpressionIndices.length];
 		this.nodeCache2 = new NodeCache[this.keyExpressionIndices.length];
 		for (int index = 0; index < this.keyExpressionIndices.length; index++) {
-			this.nodeCache1[index] = new NodeCache();
-			this.nodeCache2[index] = new NodeCache();
+			this.nodeCache1[index] = new NodeCache(CachingNodeFactory.getInstance());
+			this.nodeCache2[index] = new NodeCache(CachingNodeFactory.getInstance());
 		}
 		this.temp1 = new SopremoRecord(layout);
 		this.temp2 = new SopremoRecord(layout);
@@ -154,7 +152,6 @@ public final class SopremoRecordComparator extends TypeComparator<SopremoRecord>
 			final IJsonNode k2 = this.temp2.getKey(this.keyExpressionIndices[index], this.nodeCache2[index]);
 
 			final int comparison = k1.compareTo(k2);
-			System.out.println(k1 + " " + k2 + " -> " + comparison);
 			if (comparison != 0)
 				return this.ascending[index] ? comparison : -comparison;
 		}

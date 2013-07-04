@@ -151,12 +151,10 @@ public abstract class ElementaryOperator<Self extends ElementaryOperator<Self>>
 	 * @return the key expressions of the given input
 	 */
 	@SuppressWarnings("unchecked")
-	public List<? extends EvaluationExpression> getKeyExpressions(
-			final int inputIndex) {
+	public List<? extends EvaluationExpression> getKeyExpressions(final int inputIndex) {
 		if (inputIndex >= this.keyExpressions.size())
 			return Collections.EMPTY_LIST;
-		final List<? extends EvaluationExpression> expressions = this.keyExpressions
-			.get(inputIndex);
+		final List<? extends EvaluationExpression> expressions = this.keyExpressions.get(inputIndex);
 		if (expressions == null)
 			return Collections.EMPTY_LIST;
 		return expressions;
@@ -241,8 +239,7 @@ public abstract class ElementaryOperator<Self extends ElementaryOperator<Self>>
 		final PactModule module = new PactModule(distinctInputs.size(), 1);
 		for (final List<Contract> inputs : inputLists)
 			for (int index = 0; index < inputs.size(); index++)
-				inputs.set(index, module.getInput(distinctInputs.indexOf(inputs
-					.get(index))));
+				inputs.set(index, module.getInput(distinctInputs.indexOf(inputs.get(index))));
 		ContractUtil.setInputs(contract, inputLists);
 
 		module.getOutput(0).addInput(contract);
@@ -277,8 +274,7 @@ public abstract class ElementaryOperator<Self extends ElementaryOperator<Self>>
 			final EvaluationContext context, SopremoRecordLayout layout) {
 		for (final Field stubField : contract.getUserCodeClass()
 			.getDeclaredFields())
-			if ((stubField.getModifiers() & (Modifier.TRANSIENT
-				| Modifier.FINAL | Modifier.STATIC)) == 0) {
+			if ((stubField.getModifiers() & (Modifier.TRANSIENT | Modifier.FINAL | Modifier.STATIC)) == 0) {
 				Class<?> clazz = this.getClass();
 				do {
 					Field thisField;
