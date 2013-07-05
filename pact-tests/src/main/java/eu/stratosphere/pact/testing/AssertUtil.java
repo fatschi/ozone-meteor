@@ -37,16 +37,15 @@ public class AssertUtil {
 	 * @param expectedIterator
 	 * @param actualIterator
 	 */
-	public static <T> void assertIteratorEquals(String message, Iterator<? extends T> expectedIterator,
-			Iterator<? extends T> actualIterator, Equaler<T> equaler, TypeStringifier<T> stringifier) {
+	public static <T> void assertIteratorEquals(String message, Iterator<? extends T> expectedIterator, Iterator<? extends T> actualIterator,
+			Equaler<T> equaler, TypeStringifier<T> stringifier) {
 
 		int index = 0;
 		for (; actualIterator.hasNext() && expectedIterator.hasNext(); index++) {
 			final T expected = expectedIterator.next(), actual = actualIterator.next();
 			if (!equaler.equal(expected, actual))
-				throw new ArrayComparisonFailure(message, new AssertionFailedError(Assert.format(message,
-					stringifier.toString(expected),
-					stringifier.toString(actual))), index);
+				throw new ArrayComparisonFailure(message, new AssertionFailedError(Assert.format(message, stringifier.toString(expected),
+						stringifier.toString(actual))), index);
 		}
 
 		if (expectedIterator.hasNext())
@@ -61,20 +60,23 @@ public class AssertUtil {
 	 * @param expectedIterator
 	 * @param actualIterator
 	 */
-	public static <T> void assertIteratorEquals(Iterator<? extends T> expectedIterator,
-			Iterator<? extends T> actualIterator, Equaler<T> equaler, TypeStringifier<T> stringifier) {
+	public static <T> void assertIteratorEquals(Iterator<? extends T> expectedIterator, Iterator<? extends T> actualIterator, Equaler<T> equaler,
+			TypeStringifier<T> stringifier) {
 		assertIteratorEquals(null, expectedIterator, actualIterator, equaler, stringifier);
 	}
 
-	/**
-	 * Asserts that two iterators generate equal series of objects.
-	 * 
-	 * @param expectedIterator
-	 * @param actualIterator
-	 */
-	public static <T> void assertIteratorEquals(Iterator<? extends T> expectedIterator, Iterator<T> actualIterator) {
-		assertIteratorEquals(null, expectedIterator, actualIterator, Equaler.JavaEquals, TypeStringifier.JavaToString);
-	}
+	// not used
+	// /**
+	// * Asserts that two iterators generate equal series of objects.
+	// *
+	// * @param expectedIterator
+	// * @param actualIterator
+	// */
+	// public static <T> void assertIteratorEquals(Iterator<? extends T>
+	// expectedIterator, Iterator<T> actualIterator) {
+	// assertIteratorEquals(null, expectedIterator, actualIterator,
+	// Equaler.JavaEquals, TypeStringifier.JavaToString);
+	// }
 
 	/**
 	 * Asserts that two iterators generate equal series of objects.
@@ -82,8 +84,7 @@ public class AssertUtil {
 	 * @param expectedIterator
 	 * @param actualIterator
 	 */
-	public static <T extends Record> void assertIteratorEquals(Iterator<T> expectedIterator,
-			Iterator<T> actualIterator, TypeConfig<T> config) {
+	public static <T extends Record> void assertIteratorEquals(Iterator<T> expectedIterator, Iterator<T> actualIterator, TypeConfig<T> config) {
 		assertIteratorEquals(null, expectedIterator, actualIterator, config.getEqualer(), config.getTypeStringifier());
 	}
 
@@ -93,10 +94,49 @@ public class AssertUtil {
 	 * @param expectedIterator
 	 * @param actualIterator
 	 */
-	public static <T extends Record> void assertIteratorEquals(String message, Iterator<T> expectedIterator,
-			Iterator<T> actualIterator, TypeConfig<T> config) {
-		assertIteratorEquals(message, expectedIterator, actualIterator, config.getEqualer(),
-			config.getTypeStringifier());
+	public static <T extends Record> void assertIteratorEquals(String message, Iterator<T> expectedIterator, Iterator<T> actualIterator, TypeConfig<T> config) {
+		assertIteratorEquals(message, expectedIterator, actualIterator, config.getEqualer(), config.getTypeStringifier());
 	}
 
+	/**
+	 * Asserts that two iterators generate equal series of objects.
+	 * 
+	 * @param message
+	 * @param expectedIterator
+	 * @param actualIterator
+	 */
+	public static <T> void assertIteratorEquals(String message, Iterator<? extends T> expectedIterator, Iterator<? extends T> actualIterator, Equaler<T> equaler) {
+
+		int index = 0;
+		for (; actualIterator.hasNext() && expectedIterator.hasNext(); index++) {
+			final T expected = expectedIterator.next(), actual = actualIterator.next();
+			if (!equaler.equal(expected, actual))
+				throw new ArrayComparisonFailure(message, new AssertionFailedError(Assert.format(message, expected, actual)), index);
+		}
+
+		if (expectedIterator.hasNext())
+			throw new ArrayComparisonFailure(message, new AssertionError("More elements expected"), index);
+		if (actualIterator.hasNext())
+			throw new ArrayComparisonFailure(message, new AssertionError("Less elements expected"), index);
+	}
+
+	/**
+	 * Asserts that two iterators generate equal series of objects.
+	 * 
+	 * @param expectedIterator
+	 * @param actualIterator
+	 */
+	public static <T> void assertIteratorEquals(Iterator<? extends T> expectedIterator, Iterator<? extends T> actualIterator, Equaler<T> equaler) {
+		assertIteratorEquals(null, expectedIterator, actualIterator, equaler);
+	}
+
+	/**
+	 * Asserts that two iterators generate equal series of objects.
+	 * 
+	 * @param expectedIterator
+	 * @param actualIterator
+	 */
+	public static <T> void assertIteratorEquals(Iterator<? extends T> expectedIterator, Iterator<? extends T> actualIterator) {
+		assertIteratorEquals(null, expectedIterator, actualIterator, Equaler.JavaEquals);
+	}
 }
