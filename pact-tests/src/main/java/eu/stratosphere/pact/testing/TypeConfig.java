@@ -45,7 +45,7 @@ public class TypeConfig<T extends Record> implements Cloneable {
 
 	private final Equaler<T> equaler;
 
-	protected TypeConfig(TypeComparatorFactory<T> typeComparatorFactory,
+	public TypeConfig(TypeComparatorFactory<T> typeComparatorFactory,
 			TypePairComparatorFactory<T, T> typePairComparatorFactory, TypeSerializerFactory<T> typeSerializerFactory,
 			TypeStringifier<T> typeStringifier, KeyExtractor<T> keyExtractor, Equaler<T> equaler) {
 		this.typeComparatorFactory = typeComparatorFactory;

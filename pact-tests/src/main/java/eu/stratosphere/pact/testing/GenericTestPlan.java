@@ -566,6 +566,10 @@ public abstract class GenericTestPlan<T extends Record, Records extends GenericT
 			}
 		}
 
+		return createPlan(wrappedSinks);
+	}
+
+	protected Plan createPlan(final Collection<GenericDataSink> wrappedSinks) {
 		return new Plan(wrappedSinks);
 	}
 
