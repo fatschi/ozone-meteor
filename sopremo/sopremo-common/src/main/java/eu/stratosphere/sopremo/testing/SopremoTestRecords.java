@@ -18,6 +18,7 @@ import java.util.Arrays;
 
 import eu.stratosphere.pact.testing.DefaultEqualer;
 import eu.stratosphere.pact.testing.DefaultStringifier;
+import eu.stratosphere.pact.testing.DefaultStringifier;
 import eu.stratosphere.pact.testing.Equaler;
 import eu.stratosphere.pact.testing.GenericTestRecords;
 import eu.stratosphere.pact.testing.TypeConfig;

@@ -189,6 +189,7 @@ public final class SopremoRecord extends AbstractSopremoType implements ISopremo
 			Arrays.fill(this.offsets, MISSING);
 			this.binaryRepresentation.clear();
 			writeRecursivelyToBuffer(this.node, this.layout.getExpressionIndex());
+			System.err.println(node + " " + Arrays.toString(offsets));
 			this.output.flush();
 		} else if (SopremoUtil.DEBUG && this.binaryRepresentation.size() == 0)
 			throw new IllegalStateException("Attempt to write zero length binary representation");
@@ -214,6 +215,7 @@ public final class SopremoRecord extends AbstractSopremoType implements ISopremo
 		if (this.node != null) {
 			Arrays.fill(this.offsets, MISSING);
 			writeRecursivelyToBuffer(this.node, this.layout.getExpressionIndex());
+			System.err.println(node + " " + Arrays.toString(offsets));
 			this.output.flush();
 		} else if (SopremoUtil.DEBUG && this.binaryRepresentation.size() == 0)
 			throw new IllegalStateException("Attempt to write zero length binary representation");

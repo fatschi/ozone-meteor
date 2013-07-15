@@ -62,9 +62,10 @@ public class JoinTest extends SopremoOperatorTestBase<Join> {
 		final Join join = new Join().withJoinCondition(condition);
 		join.setInputs(sopremoPlan.getInputOperators(0, 2));
 		sopremoPlan.getOutputOperator(0).setInputs(join);
-		sopremoPlan.getInput(0).addObject("name", "Jon Doe", "password", "asdf1234", "id", 1).addObject("name",
-			"Jane Doe", "password", "qwertyui", "id", 2)
-			.addObject("name", "Max Mustermann", "password", "q1w2e3r4", "id", 3);
+		sopremoPlan.getInput(0).
+			addObject("name", "Jon Doe", "password", "asdf1234", "id", 1).
+			addObject("name", "Jane Doe", "password", "qwertyui", "id", 2).
+			addObject("name", "Max Mustermann", "password", "q1w2e3r4", "id", 3);
 		sopremoPlan.getInput(1).addObject("userid", 1, "url", "code.google.com/p/jaql/").addObject("userid", 2, "url",
 			"www.cnn.com")
 			.addObject("userid", 1, "url", "java.sun.com/javase/6/docs/api/");
@@ -85,8 +86,7 @@ public class JoinTest extends SopremoOperatorTestBase<Join> {
 		final SopremoTestPlan sopremoPlan = new SopremoTestPlan(3, 1);
 
 		final AndExpression condition =
-			new AndExpression(new ComparativeExpression(createPath("0", "id"), BinaryOperator.EQUAL, createPath("1",
-				"userid")),
+			new AndExpression(new ComparativeExpression(createPath("0", "id"), BinaryOperator.EQUAL, createPath("1", "userid")),
 				new ComparativeExpression(createPath("1", "url"), BinaryOperator.EQUAL, createPath("2", "page")));
 		final ObjectCreation transformation = new ObjectCreation();
 		transformation.addMapping("name", createPath("0", "name"));
@@ -95,9 +95,10 @@ public class JoinTest extends SopremoOperatorTestBase<Join> {
 		final Join join = new Join().withJoinCondition(condition).withResultProjection(transformation);
 		join.setInputs(sopremoPlan.getInputOperators(0, 3));
 		sopremoPlan.getOutputOperator(0).setInputs(join);
-		sopremoPlan.getInput(0).addObject("name", "Jon Doe", "password", "asdf1234", "id", 1).addObject("name",
-			"Jane Doe", "password", "qwertyui", "id", 2)
-			.addObject("name", "Max Mustermann", "password", "q1w2e3r4", "id", 3);
+		sopremoPlan.getInput(0).
+			addObject("name", "Jon Doe", "password", "asdf1234", "id", 1).
+			addObject("name", "Jane Doe", "password", "qwertyui", "id", 2).
+			addObject("name", "Max Mustermann", "password", "q1w2e3r4", "id", 3);
 		sopremoPlan.getInput(1).addObject("userid", 1, "url", "code.google.com/p/jaql/").addObject("userid", 2, "url",
 			"www.oracle.com")
 			.addObject("userid", 1, "url", "java.sun.com/javase/6/docs/api/").addObject("userid", 3, "url",
@@ -111,6 +112,7 @@ public class JoinTest extends SopremoOperatorTestBase<Join> {
 			.addObject("name", "Jane Doe", "url", "www.oracle.com", "company", "oracle")
 			.addObject("name", "Max Mustermann", "url", "www.oracle.com", "company", "oracle");
 
+		sopremoPlan.trace();
 		sopremoPlan.run();
 	}
 
@@ -208,7 +210,8 @@ public class JoinTest extends SopremoOperatorTestBase<Join> {
 		join.setInputs(sopremoPlan.getInputOperators(0, 3));
 		sopremoPlan.getOutputOperator(0).setInputs(join);
 		for (int i = 0; i <= 2; i++)
-			sopremoPlan.getInput(i).addObject("kryo", 1, "fk", 2).addObject("kryo", 2, "fk", 3).addObject("kryo", 3, "fk", 1);
+			sopremoPlan.getInput(i).addObject("kryo", 1, "fk", 2).addObject("kryo", 2, "fk", 3).addObject("kryo", 3,
+				"fk", 1);
 		sopremoPlan.getExpectedOutput(0).addObject("k1", 1, "k2", 2, "k3", 3).addObject("k1", 2, "k2", 3, "k3", 1).addObject(
 			"k1", 3, "k2", 1, "k3", 2);
 
@@ -233,7 +236,8 @@ public class JoinTest extends SopremoOperatorTestBase<Join> {
 		join.setInputs(sopremoPlan.getInputOperators(0, 3));
 		sopremoPlan.getOutputOperator(0).setInputs(join);
 		for (int i = 0; i <= 2; i++)
-			sopremoPlan.getInput(i).addObject("kryo", 1, "fk", 2).addObject("kryo", 2, "fk", 3).addObject("kryo", 1, "fk", 3);
+			sopremoPlan.getInput(i).addObject("kryo", 1, "fk", 2).addObject("kryo", 2, "fk", 3).addObject("kryo", 1,
+				"fk", 3);
 		sopremoPlan.getExpectedOutput(0).addObject("k1", 1, "k2", 2, "k3", 3);
 
 		sopremoPlan.run();
