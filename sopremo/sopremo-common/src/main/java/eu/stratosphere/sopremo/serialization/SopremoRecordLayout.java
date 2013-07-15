@@ -40,7 +40,7 @@ import eu.stratosphere.util.AppendUtil;
 /**
  * @author arv
  */
-@DefaultSerializer(value = SopremoRecordLayout.KryoSerializer.class)
+@DefaultSerializer(SopremoRecordLayout.KryoSerializer.class)
 public class SopremoRecordLayout extends AbstractSopremoType {
 	/**
 	 * 

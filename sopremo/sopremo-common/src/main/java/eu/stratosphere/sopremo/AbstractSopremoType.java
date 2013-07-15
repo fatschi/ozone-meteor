@@ -15,12 +15,7 @@
 package eu.stratosphere.sopremo;
 
 import java.io.IOException;
-import java.util.List;
-
-import com.esotericsoftware.kryo.Kryo;
-
-import eu.stratosphere.sopremo.packages.ITypeRegistry;
-import eu.stratosphere.sopremo.type.IJsonNode;
+import java.util.Iterator;
 
 /**
  * Provides basic implementations of the required methods of {@link SopremoType}
@@ -55,6 +50,20 @@ public abstract class AbstractSopremoType implements ISopremoType {
 		if (copy.getClass() != this.getClass())
 			throw new AssertionError(String.format("Create copy returned wrong type. Expected %s but was %s",
 				this.getClass(), copy.getClass()));
+	}
+
+	protected void append(final Appendable appendable, final Iterable<? extends ISopremoType> children, final String separator)
+			throws IOException {
+		Iterator<? extends ISopremoType> iterator = children.iterator();
+		for (int index = 0; iterator.hasNext(); index++) {
+			if (index > 0)
+				appendable.append(separator);
+			ISopremoType child = iterator.next();
+			if (child == null)
+				appendable.append("!null!");
+			else
+				child.appendAsString(appendable);
+		}
 	}
 
 	/*

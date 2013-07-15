@@ -19,13 +19,23 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
+import java.io.IOException;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map.Entry;
 import java.util.Set;
 
+import javolution.text.TypeFormat;
+
+import com.esotericsoftware.kryo.DefaultSerializer;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.Serializer;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import com.google.common.base.Predicate;
 
+import eu.stratosphere.sopremo.AbstractSopremoType;
 import eu.stratosphere.sopremo.expressions.ArrayAccess;
 import eu.stratosphere.sopremo.expressions.EvaluationExpression;
 import eu.stratosphere.sopremo.expressions.InputSelection;
@@ -34,7 +44,8 @@ import eu.stratosphere.sopremo.expressions.ObjectAccess;
 /**
  * @author arv
  */
-public class ExpressionIndex {
+public class ExpressionIndex extends AbstractSopremoType {
+
 	private final EvaluationExpression expression;
 
 	private final Object2ObjectMap<String, ExpressionIndex> objectAccesses =
@@ -45,7 +56,7 @@ public class ExpressionIndex {
 	private final static ExpressionIndex EMPTY_INDEX = new ExpressionIndex(null, -1);
 
 	private final int keyIndex;
-	
+
 	/**
 	 * Returns the expression.
 	 * 
@@ -76,7 +87,7 @@ public class ExpressionIndex {
 	public ExpressionIndex subIndex(String fieldName) {
 		return this.objectAccesses.get(fieldName);
 	}
-	
+
 	/**
 	 * Returns the keyIndex.
 	 * 
@@ -124,7 +135,7 @@ public class ExpressionIndex {
 		if (expressionChain.isEmpty())
 			return;
 
-		final EvaluationExpression currentExpression = expressionChain.pop();
+		final EvaluationExpression currentExpression = expressionChain.removeLast();
 		if (currentExpression instanceof ObjectAccess) {
 			final ObjectAccess objectAccess = (ObjectAccess) currentExpression;
 			ExpressionIndex subIndex = this.objectAccesses.get(objectAccess.getField());
@@ -146,6 +157,30 @@ public class ExpressionIndex {
 			if (subIndex == EMPTY_INDEX)
 				this.arrayAccesses.put(index, subIndex = new ExpressionIndex(new ArrayAccess(index), keyIndex));
 			subIndex.add(expressionChain, expression, keyIndex);
-		}
+		} else if(currentExpression == EvaluationExpression.VALUE)
+			add(expressionChain, currentExpression, keyIndex);
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see eu.stratosphere.sopremo.ISopremoType#appendAsString(java.lang.Appendable)
+	 */
+	@Override
+	public void appendAsString(Appendable builder) throws IOException {
+		builder.append("ExpressionIndex ");
+		if (this.expression != null)
+			this.expression.appendAsString(builder);
+		if (!this.objectAccesses.isEmpty()) {
+			builder.append(", objectAccesses=");
+			append(builder, this.objectAccesses.values(), ", ");
+		}
+		if (!this.arrayAccesses.isEmpty()) {
+			builder.append(", arrayAccesses=");
+			append(builder, this.arrayAccesses.values(), ", ");
+		}
+		builder.append(", keyIndex=");
+		TypeFormat.format(this.keyIndex, builder);
+		builder.append("]");
+	}
+
 }
