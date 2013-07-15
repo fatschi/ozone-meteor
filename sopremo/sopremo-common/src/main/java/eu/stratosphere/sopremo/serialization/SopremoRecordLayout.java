@@ -42,6 +42,11 @@ import eu.stratosphere.util.AppendUtil;
  */
 @DefaultSerializer(value = SopremoRecordLayout.KryoSerializer.class)
 public class SopremoRecordLayout extends AbstractSopremoType {
+	/**
+	 * 
+	 */
+	public static final int VALUE_INDEX = Integer.MAX_VALUE;
+
 	public static class KryoSerializer extends Serializer<SopremoRecordLayout> {
 
 		/*
@@ -94,7 +99,9 @@ public class SopremoRecordLayout extends AbstractSopremoType {
 
 	public IntCollection indicesOf(EvaluationExpression expression) {
 		final IntArrayList indices = new IntArrayList();
-		if (expression instanceof ArrayAccess && ((ArrayAccess) expression).isFixedSize())
+		if (expression == EvaluationExpression.VALUE)
+			indices.add(VALUE_INDEX);
+		else if (expression instanceof ArrayAccess && ((ArrayAccess) expression).isFixedSize())
 			for (ArrayAccess arrayAccess : ((ArrayAccess) expression).decompose())
 				indices.add(this.indexedDirectDataExpression.getInt(arrayAccess));
 		else {
@@ -166,6 +173,9 @@ public class SopremoRecordLayout extends AbstractSopremoType {
 	}
 
 	public int getKeyIndex(EvaluationExpression expression) {
+		if (expression == EvaluationExpression.VALUE)
+			return -1;
+
 		int offset = this.indexedDirectDataExpression.getInt(expression);
 		if (offset == UNKNOWN_KEY_EXPRESSION)
 			offset = this.indexedCalculatedKeyExpressions.getInt(expression);
@@ -264,6 +274,8 @@ public class SopremoRecordLayout extends AbstractSopremoType {
 	 * @return
 	 */
 	public EvaluationExpression getExpression(int expressionIndex) {
+		if (expressionIndex == SopremoRecordLayout.VALUE_INDEX)
+			return EvaluationExpression.VALUE;
 		final int numDirectDataKeys = getNumDirectDataKeys();
 		if (expressionIndex < numDirectDataKeys)
 			return this.directDataExpression[expressionIndex];

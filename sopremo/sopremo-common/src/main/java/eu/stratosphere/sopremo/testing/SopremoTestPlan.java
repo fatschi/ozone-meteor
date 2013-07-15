@@ -535,7 +535,7 @@ public class SopremoTestPlan {
 
 		private boolean empty = false;
 
-		private final SopremoTestPlan testPlan;
+		private final transient SopremoTestPlan testPlan;
 
 		public ModifiableChannel(final SopremoTestPlan testPlan, final O operator, final int index) {
 			super(operator, index);

@@ -451,7 +451,7 @@ public final class SopremoRecord extends AbstractSopremoType implements ISopremo
 	public IJsonNode getKey(EvaluationExpression expression, IJsonNode target) {
 		if (this.node == null) {
 			int offset = getKeyOffset(this.layout.getKeyIndex(expression));
-			if(offset == MISSING)
+			if(offset < 0)
 				return MissingNode.getInstance();
 			return getValueAtOffset(offset, target);
 		}
@@ -489,15 +489,21 @@ public final class SopremoRecord extends AbstractSopremoType implements ISopremo
 	}
 
 	public int getKeyOffset(int expressionIndex) {
+		if(expressionIndex == SopremoRecordLayout.VALUE_INDEX)
+			return 0;
 		return this.offsets[expressionIndex];
 	}
 
 	public IJsonNode getValueAtOffset(int offset, IJsonNode target) {
+		if(offset == 0)
+			return getNode();
 		this.input.setBuffer(this.binaryRepresentation.elements(), offset, this.binaryRepresentation.size());
 		return readRecursively(target);
 	}
 
 	public IJsonNode getValueAtOffset(int offset, NodeCache nodeCache) {
+		if(offset == 0)
+			return getNode();
 		this.input.setBuffer(this.binaryRepresentation.elements(), offset, this.binaryRepresentation.size());
 		return readRecursively(nodeCache);
 	}

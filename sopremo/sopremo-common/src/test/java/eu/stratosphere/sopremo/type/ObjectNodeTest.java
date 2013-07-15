@@ -24,7 +24,7 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.stratosphere.sopremo.util.AssertUtil;
+import eu.stratosphere.pact.testing.AssertUtil;
 
 /**
  * @author Michael Hopstock
