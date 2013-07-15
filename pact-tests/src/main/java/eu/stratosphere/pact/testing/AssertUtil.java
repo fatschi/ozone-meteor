@@ -37,21 +37,22 @@ public class AssertUtil {
 	 * @param expectedIterator
 	 * @param actualIterator
 	 */
-	public static <T> void assertIteratorEquals(String message, Iterator<? extends T> expectedIterator, Iterator<? extends T> actualIterator,
+	public static <T> void assertIteratorEquals(String message, Iterator<? extends T> expectedIterator,
+			Iterator<? extends T> actualIterator,
 			Equaler<T> equaler, TypeStringifier<T> stringifier) {
 
 		int index = 0;
 		for (; actualIterator.hasNext() && expectedIterator.hasNext(); index++) {
 			final T expected = expectedIterator.next(), actual = actualIterator.next();
 			if (!equaler.equal(expected, actual))
-				throw new ArrayComparisonFailure(message, new AssertionFailedError(Assert.format(message, stringifier.toString(expected),
-						stringifier.toString(actual))), index);
+				throw new AssertionError(message, new AssertionError(Assert.format(message + " @ " + index,
+					stringifier.toString(expected), stringifier.toString(actual))));
 		}
 
 		if (expectedIterator.hasNext())
-			throw new ArrayComparisonFailure(message, new AssertionError("More elements expected"), index);
+			throw new AssertionError(message, new AssertionError("More elements expected @ " + index));
 		if (actualIterator.hasNext())
-			throw new ArrayComparisonFailure(message, new AssertionError("Less elements expected"), index);
+			throw new AssertionError(message, new AssertionError("Less elements expected @ " + index));
 	}
 
 	/**
@@ -60,7 +61,8 @@ public class AssertUtil {
 	 * @param expectedIterator
 	 * @param actualIterator
 	 */
-	public static <T> void assertIteratorEquals(Iterator<? extends T> expectedIterator, Iterator<? extends T> actualIterator, Equaler<T> equaler,
+	public static <T> void assertIteratorEquals(Iterator<? extends T> expectedIterator, Iterator<? extends T> actualIterator,
+			Equaler<T> equaler,
 			TypeStringifier<T> stringifier) {
 		assertIteratorEquals(null, expectedIterator, actualIterator, equaler, stringifier);
 	}
@@ -84,7 +86,8 @@ public class AssertUtil {
 	 * @param expectedIterator
 	 * @param actualIterator
 	 */
-	public static <T extends Record> void assertIteratorEquals(Iterator<T> expectedIterator, Iterator<T> actualIterator, TypeConfig<T> config) {
+	public static <T extends Record> void assertIteratorEquals(Iterator<T> expectedIterator, Iterator<T> actualIterator,
+			TypeConfig<T> config) {
 		assertIteratorEquals(null, expectedIterator, actualIterator, config.getEqualer(), config.getTypeStringifier());
 	}
 
@@ -94,7 +97,8 @@ public class AssertUtil {
 	 * @param expectedIterator
 	 * @param actualIterator
 	 */
-	public static <T extends Record> void assertIteratorEquals(String message, Iterator<T> expectedIterator, Iterator<T> actualIterator, TypeConfig<T> config) {
+	public static <T extends Record> void assertIteratorEquals(String message, Iterator<T> expectedIterator, Iterator<T> actualIterator,
+			TypeConfig<T> config) {
 		assertIteratorEquals(message, expectedIterator, actualIterator, config.getEqualer(), config.getTypeStringifier());
 	}
 
@@ -105,19 +109,10 @@ public class AssertUtil {
 	 * @param expectedIterator
 	 * @param actualIterator
 	 */
-	public static <T> void assertIteratorEquals(String message, Iterator<? extends T> expectedIterator, Iterator<? extends T> actualIterator, Equaler<T> equaler) {
-
-		int index = 0;
-		for (; actualIterator.hasNext() && expectedIterator.hasNext(); index++) {
-			final T expected = expectedIterator.next(), actual = actualIterator.next();
-			if (!equaler.equal(expected, actual))
-				throw new ArrayComparisonFailure(message, new AssertionFailedError(Assert.format(message, expected, actual)), index);
-		}
-
-		if (expectedIterator.hasNext())
-			throw new ArrayComparisonFailure(message, new AssertionError("More elements expected"), index);
-		if (actualIterator.hasNext())
-			throw new ArrayComparisonFailure(message, new AssertionError("Less elements expected"), index);
+	public static <T> void assertIteratorEquals(String message, Iterator<? extends T> expectedIterator,
+			Iterator<? extends T> actualIterator, Equaler<T> equaler) {
+		TypeStringifier<T> typeStringifier = DefaultStringifier.get();
+		assertIteratorEquals(message, expectedIterator, actualIterator, equaler, typeStringifier);
 	}
 
 	/**
@@ -126,7 +121,8 @@ public class AssertUtil {
 	 * @param expectedIterator
 	 * @param actualIterator
 	 */
-	public static <T> void assertIteratorEquals(Iterator<? extends T> expectedIterator, Iterator<? extends T> actualIterator, Equaler<T> equaler) {
+	public static <T> void assertIteratorEquals(Iterator<? extends T> expectedIterator, Iterator<? extends T> actualIterator,
+			Equaler<T> equaler) {
 		assertIteratorEquals(null, expectedIterator, actualIterator, equaler);
 	}
 

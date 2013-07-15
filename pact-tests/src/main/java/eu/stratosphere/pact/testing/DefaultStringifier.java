@@ -39,7 +39,7 @@ public final class DefaultStringifier implements TypeStringifier<Object> {
 	 */
 	@Override
 	public void appendAsString(Appendable appendable, Object object) throws IOException {
-		appendable.append(toString());
+		appendable.append(object.toString());
 	}
 
 	/*

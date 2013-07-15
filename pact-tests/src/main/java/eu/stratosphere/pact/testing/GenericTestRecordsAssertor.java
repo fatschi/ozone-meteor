@@ -116,7 +116,7 @@ class GenericTestRecordsAssertor<T extends Record> {
 
 	@SuppressWarnings("unchecked")
 	private void matchValues(Comparable<T>[] currentKeys, int itemIndex, List<T> expectedValuesWithCurrentKey,
-			List<T> actualValuesWithCurrentKey) throws ArrayComparisonFailure {
+			List<T> actualValuesWithCurrentKey) throws AssertionError {
 
 		final int keySize = this.keyExtractor.getKeySize();
 		Comparable<T>[] actualKeys = new Comparable[keySize];
@@ -133,24 +133,26 @@ class GenericTestRecordsAssertor<T extends Record> {
 			actualRecord = null;
 		}
 
-		if (actualValuesWithCurrentKey.isEmpty())
-			throw new ArrayComparisonFailure("Unexpected value for key " + Arrays.toString(currentKeys),
+		if (actualValuesWithCurrentKey.isEmpty()) {
+			final int diffIndex = itemIndex + expectedValuesWithCurrentKey.size() - 1;
+			throw new AssertionError("No value for key " + Arrays.toString(currentKeys) + " @ " + diffIndex,
 				new AssertionFailedError(
 					Assert.format(" ",
 						IteratorUtil.stringify(this.typeStringifier, expectedValuesWithCurrentKey.iterator()),
-						this.typeStringifier.toString(actualRecord))), itemIndex + expectedValuesWithCurrentKey.size() -
-					1);
+						this.typeStringifier.toString(actualRecord))));
+		}
 
 		// and invoke the fuzzy matcher
 		this.fuzzyMatcher.removeMatchingValues(this.typeConfig, expectedValuesWithCurrentKey,
 			actualValuesWithCurrentKey);
 
-		if (!expectedValuesWithCurrentKey.isEmpty() || !actualValuesWithCurrentKey.isEmpty())
-			throw new ArrayComparisonFailure("Unexpected values for key " + Arrays.toString(currentKeys) + ": ",
+		if (!expectedValuesWithCurrentKey.isEmpty() || !actualValuesWithCurrentKey.isEmpty()) {
+			int diffIndex = itemIndex - expectedValuesWithCurrentKey.size();
+			throw new AssertionError("Unexpected values for key " + Arrays.toString(currentKeys) + " @ " + diffIndex + ": ",
 				new AssertionFailedError(Assert.format(" ",
 					IteratorUtil.stringify(this.typeStringifier, expectedValuesWithCurrentKey.iterator()),
-					IteratorUtil.stringify(this.typeStringifier, actualValuesWithCurrentKey.iterator()))),
-				itemIndex - expectedValuesWithCurrentKey.size());
+					IteratorUtil.stringify(this.typeStringifier, actualValuesWithCurrentKey.iterator()))));
+		}
 
 		// don't forget the first record that has a different key
 		if (actualRecord != null)
