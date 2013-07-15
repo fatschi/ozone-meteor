@@ -32,38 +32,4 @@ public interface Equaler<T> {
 	 * @return true, if both objects are equal; false, otherwise.
 	 */
 	public boolean equal(T object1, T object2);
-
-	public static Equaler<Object> JavaEquals = new JavaEquals(), SafeEquals = new SafeEquals();
-
-	/**
-	 * Wraps {@link Object#equals(Object)}.
-	 * 
-	 * @author Arvid Heise
-	 */
-	public static final class JavaEquals implements Equaler<Object> {
-		/*
-		 * (non-Javadoc)
-		 * @see eu.stratosphere.pact.testing.Equaler#equal(java.lang.Object, java.lang.Object)
-		 */
-		@Override
-		public boolean equal(Object object1, Object object2) {
-			return object1.equals(object2);
-		}
-	}
-
-	/**
-	 * Wraps {@link Object#equals(Object)} but honors possible <code>null</code> values.
-	 * 
-	 * @author Arvid Heise
-	 */
-	public static final class SafeEquals implements Equaler<Object> {
-		/*
-		 * (non-Javadoc)
-		 * @see eu.stratosphere.pact.testing.Equaler#equal(java.lang.Object, java.lang.Object)
-		 */
-		@Override
-		public boolean equal(Object object1, Object object2) {
-			return object1 == null ? object2 == null : object1.equals(object2);
-		}
-	}
 }

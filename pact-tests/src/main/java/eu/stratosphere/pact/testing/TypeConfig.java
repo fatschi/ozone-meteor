@@ -117,14 +117,8 @@ public class TypeConfig<T extends Record> implements Cloneable {
 	}
 
 	public TypeComparator<T> getTypeComparator() {
-		try {
-			final TypeComparatorFactory<T> factory = this.getTypeComparatorFactory();
-			factory.readParametersFromConfig(this.getConfiguration(),
-				ClassLoader.getSystemClassLoader());
-			return factory.createComparator();
-		} catch (ClassNotFoundException e) {
-			throw new IllegalStateException("Class cannot be found in a local test setting", e);
-		}
+		final TypeComparatorFactory<T> factory = this.getTypeComparatorFactory();
+		return factory.createComparator();
 	}
 
 	public TypeComparatorFactory<T> getTypeComparatorFactory() {

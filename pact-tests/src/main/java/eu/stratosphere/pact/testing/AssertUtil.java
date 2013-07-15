@@ -137,6 +137,6 @@ public class AssertUtil {
 	 * @param actualIterator
 	 */
 	public static <T> void assertIteratorEquals(Iterator<? extends T> expectedIterator, Iterator<? extends T> actualIterator) {
-		assertIteratorEquals(null, expectedIterator, actualIterator, Equaler.JavaEquals);
+		assertIteratorEquals(null, expectedIterator, actualIterator, DefaultEqualer.get());
 	}
 }

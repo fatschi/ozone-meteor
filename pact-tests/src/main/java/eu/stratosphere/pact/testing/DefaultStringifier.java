@@ -16,10 +16,38 @@ package eu.stratosphere.pact.testing;
 
 import java.io.IOException;
 
-public interface TypeStringifier<T> {
-	TypeStringifier<Object> JavaToString = new DefaultStringifier();
+/**
+ * @author arvid
+ *
+ */
+public final class DefaultStringifier implements TypeStringifier<Object> {
+	private final static DefaultStringifier Instance = new DefaultStringifier();
+	
+	/**
+	 * Returns the instance.
+	 * 
+	 * @return the instance
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> TypeStringifier<T> get() {
+		return (TypeStringifier<T>) Instance;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see eu.stratosphere.pact.testing.TypeStringifier#appendAsString(java.lang.Appendable, java.lang.Object)
+	 */
+	@Override
+	public void appendAsString(Appendable appendable, Object object) throws IOException {
+		appendable.append(toString());
+	}
 
-	public void appendAsString(Appendable appendable, T object) throws IOException;
-
-	public String toString(T object);
+	/*
+	 * (non-Javadoc)
+	 * @see eu.stratosphere.pact.testing.TypeStringifier#toString(java.lang.Object)
+	 */
+	@Override
+	public String toString(Object object) {
+		return object.toString();
+	}
 }

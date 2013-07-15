@@ -22,7 +22,7 @@ import java.util.List;
 
 import eu.stratosphere.pact.common.type.PactRecord;
 import eu.stratosphere.pact.common.type.Value;
-import eu.stratosphere.pact.testing.Equaler;
+import eu.stratosphere.pact.testing.SafeEqualer;
 import eu.stratosphere.pact.testing.TestRecords;
 import eu.stratosphere.pact.testing.TypeConfig;
 
@@ -60,7 +60,7 @@ public class PactRecordDistance implements TypeDistance<PactRecord> {
 			List<ValueSimilarity<?>> sims = this.similarities.get(index);
 			List<ValueSimilarity<?>> allSims = this.similarities.get(-1);
 			if (sims == null && allSims == null) {
-				if (!Equaler.SafeEquals.equal(actual, expected))
+				if (!SafeEqualer.get().equal(actual, expected))
 					return ValueSimilarity.NO_MATCH;
 				continue;
 			}
