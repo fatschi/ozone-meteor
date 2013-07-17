@@ -1,15 +1,19 @@
 package eu.stratosphere.sopremo.io;
 
-import eu.stratosphere.pact.common.contract.FileDataSink;
+import java.net.URI;
+
+import eu.stratosphere.nephele.fs.Path;
+import eu.stratosphere.pact.common.contract.GenericDataSink;
 import eu.stratosphere.pact.common.plan.PactModule;
+import eu.stratosphere.pact.generic.io.OutputFormat;
 import eu.stratosphere.sopremo.EvaluationContext;
-import eu.stratosphere.sopremo.io.SopremoFileFormat.SopremoOutputFormat;
 import eu.stratosphere.sopremo.operator.ElementaryOperator;
 import eu.stratosphere.sopremo.operator.ElementarySopremoModule;
 import eu.stratosphere.sopremo.operator.InputCardinality;
 import eu.stratosphere.sopremo.operator.OutputCardinality;
 import eu.stratosphere.sopremo.operator.Property;
 import eu.stratosphere.sopremo.pact.SopremoUtil;
+import eu.stratosphere.sopremo.serialization.SopremoRecord;
 import eu.stratosphere.sopremo.serialization.SopremoRecordLayout;
 
 /**
@@ -18,26 +22,37 @@ import eu.stratosphere.sopremo.serialization.SopremoRecordLayout;
 @InputCardinality(1)
 @OutputCardinality(0)
 public class Sink extends ElementaryOperator<Sink> {
-	private String outputPath;
+	private Path outputPath;
 
-	private SopremoFileFormat format;
+	private SopremoFormat format;
 
 	/**
-	 * Initializes a Sink with the given {@link FileOutputFormat} and the given name.
+	 * Initializes a Sink with the given {@link FileOutputFormat} and the given path.
 	 * 
 	 * @param outputFormat
 	 *        the FileOutputFormat that should be used
 	 * @param outputPath
 	 *        the path of this Sink
 	 */
-	public Sink(final SopremoFileFormat format, final String outputPath) {
+	public Sink(final SopremoFormat format, final String outputPath) {
 		this.format = format;
-		this.outputPath = outputPath;
+		this.outputPath = outputPath == null ? null : new Path(outputPath);
 
 		if (format.getOutputFormat() == null)
 			throw new IllegalArgumentException("given format does not support writing");
+		checkPath();
 	}
 
+	/**
+	 * Initializes a Sink with the given {@link FileOutputFormat}.
+	 * 
+	 * @param outputFormat
+	 *        the FileOutputFormat that should be used
+	 */
+	public Sink(final SopremoFormat format) {
+		this(format, null);
+	}
+	
 	/**
 	 * Initializes a Sink with the given name. This Sink uses {@link Sink#Sink(Class, String)} with the given name and
 	 * a {@link JsonOutputFormat} to write the data.
@@ -53,7 +68,7 @@ public class Sink extends ElementaryOperator<Sink> {
 	 * Initializes a Sink. This constructor uses {@link Sink#Sink(String)} with an empty string.
 	 */
 	Sink() {
-		this("");
+		this("file:///");
 	}
 
 	/**
@@ -61,7 +76,7 @@ public class Sink extends ElementaryOperator<Sink> {
 	 * 
 	 * @return the format
 	 */
-	public SopremoFileFormat getFormat() {
+	public SopremoFormat getFormat() {
 		return this.format;
 	}
 
@@ -72,7 +87,7 @@ public class Sink extends ElementaryOperator<Sink> {
 	 *        the format to set
 	 */
 	@Property(preferred = true)
-	public void setFormat(SopremoFileFormat format) {
+	public void setFormat(SopremoFormat format) {
 		if (format == null)
 			throw new NullPointerException("format must not be null");
 		if (format.getOutputFormat() == null)
@@ -89,14 +104,15 @@ public class Sink extends ElementaryOperator<Sink> {
 	@Override
 	public PactModule asPactModule(final EvaluationContext context, SopremoRecordLayout layout) {
 		final PactModule pactModule = new PactModule(1, 0);
-		final FileDataSink contract = new FileDataSink(this.format.getOutputFormat(), this.outputPath, this.outputPath);
-		SopremoUtil.transferFieldsToConfiguration(this.format, SopremoFileFormat.class, contract.getParameters(),
-			this.format.getOutputFormat(), SopremoOutputFormat.class);
-		contract.setInput(pactModule.getInput(0));
+
+		final Class<? extends OutputFormat<SopremoRecord>> outputFormat = this.format.getOutputFormat();
+		final GenericDataSink contract = new GenericDataSink(outputFormat, this.getName());
+		this.format.configureForOutput(contract.getParameters(), this.outputPath);
 		SopremoUtil.setEvaluationContext(contract.getParameters(), context);
 		SopremoUtil.setLayout(contract.getParameters(), layout);
-		// if(this.outputFormat == JsonOutputFormat.class)
-		contract.setDegreeOfParallelism(1);
+		contract.setDegreeOfParallelism(getDegreeOfParallelism());
+
+		contract.setInput(pactModule.getInput(0));
 		pactModule.addInternalOutput(contract);
 		return pactModule;
 	}
@@ -116,7 +132,7 @@ public class Sink extends ElementaryOperator<Sink> {
 	 * @return the name
 	 */
 	public String getOutputPath() {
-		return this.outputPath;
+		return this.outputPath.toString();
 	}
 
 	/**
@@ -129,7 +145,18 @@ public class Sink extends ElementaryOperator<Sink> {
 		if (outputPath == null)
 			throw new NullPointerException("outputPath must not be null");
 
-		this.outputPath = outputPath;
+		this.outputPath = new Path(outputPath);
+		checkPath();
+	}
+
+	/**
+	 * 
+	 */
+	private void checkPath() {
+		final URI validURI = this.outputPath.toUri();
+		if (validURI.getScheme() == null)
+			throw new IllegalStateException(
+				"File name of source does not have a valid schema (such as hdfs or file): " + this.outputPath);
 	}
 
 	/**
@@ -146,7 +173,7 @@ public class Sink extends ElementaryOperator<Sink> {
 
 	@Override
 	public String toString() {
-		return "Sink [" + this.outputPath + "]";
+		return "Sink [" + this.outputPath.toUri().toString() + "]";
 	}
 
 }

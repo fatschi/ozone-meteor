@@ -44,7 +44,7 @@ import eu.stratosphere.sopremo.function.Inlineable;
 import eu.stratosphere.sopremo.function.MacroBase;
 import eu.stratosphere.sopremo.function.SopremoFunction;
 import eu.stratosphere.sopremo.io.Sink;
-import eu.stratosphere.sopremo.io.SopremoFileFormat;
+import eu.stratosphere.sopremo.io.SopremoFormat;
 import eu.stratosphere.sopremo.operator.Operator;
 import eu.stratosphere.sopremo.operator.SopremoPlan;
 import eu.stratosphere.sopremo.packages.IConstantRegistry;
@@ -125,7 +125,7 @@ public abstract class AbstractQueryParser extends Parser implements ParsingScope
 	 * @see eu.stratosphere.sopremo.query.ParsingScope#getFileFormatRegistry()
 	 */
 	@Override
-	public IConfObjectRegistry<SopremoFileFormat> getFileFormatRegistry() {
+	public IConfObjectRegistry<SopremoFormat> getFileFormatRegistry() {
 		return this.packageManager.getFileFormatRegistry();
 	}
 
@@ -334,13 +334,13 @@ public abstract class AbstractQueryParser extends Parser implements ParsingScope
 		throw new IllegalArgumentException("Unknown protocol");
 	}
 
-	protected ConfObjectInfo<? extends SopremoFileFormat> findFormat(String packageName, Token name, String pathName)
+	protected ConfObjectInfo<? extends SopremoFormat> findFormat(String packageName, Token name, String pathName)
 			throws RecognitionExceptionWithUsageHint {
 		if (name == null) {
 			Path path = new Path(pathName);
-			final IConfObjectRegistry<SopremoFileFormat> fileFormatRegistry = this.getFileFormatRegistry();
+			final IConfObjectRegistry<SopremoFormat> fileFormatRegistry = this.getFileFormatRegistry();
 			for (String fileFormat : fileFormatRegistry.keySet()) {
-				final ConfObjectInfo<SopremoFileFormat> info = fileFormatRegistry.get(fileFormat);
+				final ConfObjectInfo<SopremoFormat> info = fileFormatRegistry.get(fileFormat);
 				if (info.newInstance().canHandleFormat(path))
 					return info;
 			}
@@ -349,7 +349,7 @@ public abstract class AbstractQueryParser extends Parser implements ParsingScope
 			return fileFormatRegistry.get(fileFormatRegistry.getName(this.getDefaultFileFormat()));
 		}
 		ParsingScope scope = this.getScope(packageName);
-		final ConfObjectInfo<SopremoFileFormat> format = scope.getFileFormatRegistry().get(name.getText());
+		final ConfObjectInfo<SopremoFormat> format = scope.getFileFormatRegistry().get(name.getText());
 		if (format == null)
 			throw new RecognitionExceptionWithUsageHint(name, String.format("Unknown file format %s; possible alternatives %s", name,
 					this.inputSuggestion.suggest(name.getText(), scope.getFileFormatRegistry().keySet())));
@@ -359,7 +359,7 @@ public abstract class AbstractQueryParser extends Parser implements ParsingScope
 	/**
 	 * @return
 	 */
-	protected abstract Class<? extends SopremoFileFormat> getDefaultFileFormat();
+	protected abstract Class<? extends SopremoFormat> getDefaultFileFormat();
 
 	protected ParsingScope getScope(String packageName) {
 		if (packageName == null)

@@ -31,8 +31,8 @@ import eu.stratosphere.sopremo.io.JsonFormat;
 import eu.stratosphere.sopremo.io.JsonFormat.JsonInputFormat;
 import eu.stratosphere.sopremo.io.JsonParser;
 import eu.stratosphere.sopremo.io.Sink;
-import eu.stratosphere.sopremo.io.SopremoFileFormat;
-import eu.stratosphere.sopremo.io.SopremoFileFormat.SopremoInputFormat;
+import eu.stratosphere.sopremo.io.SopremoFormat;
+import eu.stratosphere.sopremo.io.SopremoFormat.SopremoFileInputFormat;
 import eu.stratosphere.sopremo.io.Source;
 import eu.stratosphere.sopremo.operator.JsonStream;
 import eu.stratosphere.sopremo.operator.Operator;
@@ -604,8 +604,8 @@ public class SopremoTestPlan {
 					Configuration configuration = new Configuration();
 					SopremoUtil.setEvaluationContext(configuration, this.getContext().clone());
 					SopremoUtil.setLayout(configuration, layout);
-					SopremoUtil.transferFieldsToConfiguration(new JsonFormat(), SopremoFileFormat.class, configuration,
-						JsonInputFormat.class, SopremoInputFormat.class);
+					SopremoUtil.transferFieldsToConfiguration(new JsonFormat(), SopremoFormat.class, configuration,
+						JsonInputFormat.class, SopremoFileInputFormat.class);
 					this.testRecords.load(JsonFormat.JsonInputFormat.class, this.file, configuration);
 				}
 				else
@@ -905,7 +905,8 @@ public class SopremoTestPlan {
 		 *        the index
 		 */
 		public MockupSink(final int index) {
-			super("mockup-output" + index);
+			super("file:///" + index);
+			setName("Mockup Output" + index);
 			this.index = index;
 		}
 
@@ -913,7 +914,7 @@ public class SopremoTestPlan {
 		 * Initializes SopremoTestPlan.MockupSink.
 		 */
 		MockupSink() {
-			super("");
+			super("file:///");
 			this.index = 0;
 		}
 
@@ -968,7 +969,8 @@ public class SopremoTestPlan {
 		 *        the index
 		 */
 		public MockupSource(final int index) {
-			super("mockup-input" + index);
+			super("file:///mockup-input" + index);
+			setName("Mockup-input " + index);
 			this.index = index;
 		}
 
