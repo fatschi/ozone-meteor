@@ -18,10 +18,6 @@ package eu.stratosphere.pact.testing;
 import java.util.Iterator;
 
 import junit.framework.Assert;
-import junit.framework.AssertionFailedError;
-
-import org.junit.internal.ArrayComparisonFailure;
-
 import eu.stratosphere.nephele.types.Record;
 
 /**

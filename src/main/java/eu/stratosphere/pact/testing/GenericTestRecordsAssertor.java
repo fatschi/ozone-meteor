@@ -20,10 +20,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.Assert;
-import junit.framework.AssertionFailedError;
-
-import org.junit.internal.ArrayComparisonFailure;
-
 import eu.stratosphere.nephele.types.Record;
 import eu.stratosphere.pact.generic.types.TypeSerializer;
 import eu.stratosphere.pact.testing.fuzzy.FuzzyValueMatcher;
@@ -135,11 +131,10 @@ class GenericTestRecordsAssertor<T extends Record> {
 
 		if (actualValuesWithCurrentKey.isEmpty()) {
 			final int diffIndex = itemIndex + expectedValuesWithCurrentKey.size() - 1;
-			throw new AssertionError("No value for key " + Arrays.toString(currentKeys) + " @ " + diffIndex,
-				new AssertionFailedError(
-					Assert.format(" ",
-						IteratorUtil.stringify(this.typeStringifier, expectedValuesWithCurrentKey.iterator()),
-						this.typeStringifier.toString(actualRecord))));
+			Assert.fail("No value for key " + Arrays.toString(currentKeys) + " @ " + diffIndex +
+				": " + Assert.format(" ",
+					IteratorUtil.stringify(this.typeStringifier, expectedValuesWithCurrentKey.iterator()),
+					this.typeStringifier.toString(actualRecord)));
 		}
 
 		// and invoke the fuzzy matcher
@@ -148,10 +143,10 @@ class GenericTestRecordsAssertor<T extends Record> {
 
 		if (!expectedValuesWithCurrentKey.isEmpty() || !actualValuesWithCurrentKey.isEmpty()) {
 			int diffIndex = itemIndex - expectedValuesWithCurrentKey.size();
-			throw new AssertionError("Unexpected values for key " + Arrays.toString(currentKeys) + " @ " + diffIndex + ": ",
-				new AssertionFailedError(Assert.format(" ",
+			Assert.fail("Unmatched values for key " + Arrays.toString(currentKeys) + " @ " +
+				diffIndex + ": " + Assert.format(" ",
 					IteratorUtil.stringify(this.typeStringifier, expectedValuesWithCurrentKey.iterator()),
-					IteratorUtil.stringify(this.typeStringifier, actualValuesWithCurrentKey.iterator()))));
+					IteratorUtil.stringify(this.typeStringifier, actualValuesWithCurrentKey.iterator())));
 		}
 
 		// don't forget the first record that has a different key
