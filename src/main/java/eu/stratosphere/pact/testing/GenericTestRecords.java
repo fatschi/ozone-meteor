@@ -284,7 +284,7 @@ public class GenericTestRecords<T extends Record> implements Closeable, Iterable
 	 * @throws ArrayComparisonFailure
 	 *         if the sets differ
 	 */
-	public void assertEquals(final GenericTestRecords<T> expectedValues) throws ArrayComparisonFailure {
+	public void assertEquals(final GenericTestRecords<T> expectedValues) throws AssertionError {
 		new GenericTestRecordsAssertor<T>(expectedValues.getTypeConfig(), expectedValues, this).assertEquals();
 	}
 

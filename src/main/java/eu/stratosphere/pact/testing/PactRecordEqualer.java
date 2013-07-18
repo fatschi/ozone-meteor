@@ -57,7 +57,7 @@ public class PactRecordEqualer implements Equaler<PactRecord> {
 			return false;
 
 		for (int index = 0; index < schema.length; index++)
-			if (!Equaler.SafeEquals.equal(object1.getField(index, schema[index]),
+			if (!SafeEqualer.get().equal(object1.getField(index, schema[index]),
 				object2.getField(index, schema[index])))
 				return false;
 		return true;

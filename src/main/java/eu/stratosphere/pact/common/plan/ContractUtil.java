@@ -60,8 +60,8 @@ public class ContractUtil {
 		STUB_CONTRACTS.put(CoGroupStub.class, CoGroupContract.class);
 		STUB_CONTRACTS.put(CrossStub.class, CrossContract.class);
 		STUB_CONTRACTS.put(MatchStub.class, MatchContract.class);
-		STUB_CONTRACTS.put(FileInputFormat.class, FileDataSource.class);
-		STUB_CONTRACTS.put(FileOutputFormat.class, FileDataSink.class);
+//		STUB_CONTRACTS.put(FileInputFormat.class, FileDataSource.class);
+//		STUB_CONTRACTS.put(FileOutputFormat.class, FileDataSink.class);
 		STUB_CONTRACTS.put(InputFormat.class, GenericDataSource.class);
 		STUB_CONTRACTS.put(OutputFormat.class, GenericDataSink.class);
 	}

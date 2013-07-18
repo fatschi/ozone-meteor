@@ -14,30 +14,29 @@
  **********************************************************************************************************************/
 package eu.stratosphere.pact.testing;
 
-import java.io.IOException;
-
-public interface TypeStringifier<T> {
-	TypeStringifier<Object> JavaToString = new TypeStringifier<Object>() {
-		/*
-		 * (non-Javadoc)
-		 * @see eu.stratosphere.pact.testing.TypeStringifier#appendAsString(java.lang.Appendable, java.lang.Object)
-		 */
-		@Override
-		public void appendAsString(Appendable appendable, Object object) throws IOException {
-			appendable.append(toString());
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see eu.stratosphere.pact.testing.TypeStringifier#toString(java.lang.Object)
-		 */
-		@Override
-		public String toString(Object object) {
-			return object.toString();
-		}
-	};
-
-	public void appendAsString(Appendable appendable, T object) throws IOException;
-
-	public String toString(T object);
+/**
+ * Wraps {@link Object#equals(Object)}.
+ * 
+ * @author Arvid Heise
+ */
+public final class DefaultEqualer implements Equaler<Object> {
+	private final static DefaultEqualer Instance = new DefaultEqualer();
+	
+	/**
+	 * Returns the instance.
+	 * 
+	 * @return the instance
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> Equaler<T> get() {
+		return (Equaler<T>) Instance;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see eu.stratosphere.pact.testing.Equaler#equal(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public boolean equal(Object object1, Object object2) {
+		return object1.equals(object2);
+	}
 }

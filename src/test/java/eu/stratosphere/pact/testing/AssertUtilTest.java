@@ -32,7 +32,7 @@ public class AssertUtilTest {
 	 */
 	@Test
 	public void twoEmptyIteratorsShouldBeEquals() {
-		AssertUtil.assertIteratorEquals(Arrays.asList().iterator(), Arrays.asList().iterator(), Equaler.JavaEquals, TypeStringifier.JavaToString);
+		AssertUtil.assertIteratorEquals(Arrays.asList().iterator(), Arrays.asList().iterator(), DefaultEqualer.get(), TypeStringifier.JavaToString);
 	}
 	
 	/**
@@ -40,7 +40,7 @@ public class AssertUtilTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void nullAsExpectedIteratorShouldFail() {
-		AssertUtil.assertIteratorEquals(null, Arrays.asList().iterator(), Equaler.JavaEquals, TypeStringifier.JavaToString);
+		AssertUtil.assertIteratorEquals(null, Arrays.asList().iterator(), DefaultEqualer.get(), TypeStringifier.JavaToString);
 	}
 
 	/**
@@ -48,7 +48,7 @@ public class AssertUtilTest {
 	 */
 	@Test(expected = NullPointerException.class)
 	public void nullAsActualIteratorShouldFail() {
-		AssertUtil.assertIteratorEquals(Arrays.asList().iterator(), null, Equaler.JavaEquals, TypeStringifier.JavaToString);
+		AssertUtil.assertIteratorEquals(Arrays.asList().iterator(), null, DefaultEqualer.get(), TypeStringifier.JavaToString);
 	}
 
 	/**
@@ -57,7 +57,7 @@ public class AssertUtilTest {
 	@Test
 	public void twoIteratorsFromSameCollectionShouldBeEquals() {
 		List<String> collection = Arrays.asList("a", "b", "c");
-		AssertUtil.assertIteratorEquals(collection.iterator(), collection.iterator(), Equaler.JavaEquals, TypeStringifier.JavaToString);
+		AssertUtil.assertIteratorEquals(collection.iterator(), collection.iterator(), DefaultEqualer.get(), TypeStringifier.JavaToString);
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class AssertUtilTest {
 	@Test
 	public void twoIteratorsFromEqualCollectionShouldBeEquals() {
 		List<String> collection = Arrays.asList("a", "b", "c");
-		AssertUtil.assertIteratorEquals(collection.iterator(), new ArrayList<String>(collection).iterator(), Equaler.JavaEquals, TypeStringifier.JavaToString);
+		AssertUtil.assertIteratorEquals(collection.iterator(), new ArrayList<String>(collection).iterator(), DefaultEqualer.get(), TypeStringifier.JavaToString);
 	}
 
 	/**
@@ -76,7 +76,7 @@ public class AssertUtilTest {
 	public void twoUnequalIteratorsShouldFail() {
 		List<String> collection1 = Arrays.asList("a", "b", "c");
 		List<String> collection2 = Arrays.asList("d", "e", "f");
-		AssertUtil.assertIteratorEquals(collection1.iterator(), collection2.iterator(), Equaler.JavaEquals, TypeStringifier.JavaToString);
+		AssertUtil.assertIteratorEquals(collection1.iterator(), collection2.iterator(), DefaultEqualer.get(), TypeStringifier.JavaToString);
 	}
 
 	/**
@@ -85,7 +85,7 @@ public class AssertUtilTest {
 	@Test(expected = AssertionError.class)
 	public void emptyAndFilledIteratorShouldFail() {
 		List<String> collection1 = Arrays.asList("a", "b", "c");
-		AssertUtil.assertIteratorEquals(Arrays.asList().iterator(), collection1.iterator(), Equaler.JavaEquals, TypeStringifier.JavaToString);
+		AssertUtil.assertIteratorEquals(Arrays.asList().iterator(), collection1.iterator(), DefaultEqualer.get(), TypeStringifier.JavaToString);
 	}
 
 	/**
@@ -94,7 +94,7 @@ public class AssertUtilTest {
 	@Test(expected = AssertionError.class)
 	public void filledAndEmptyIteratorShouldFail() {
 		List<String> collection1 = Arrays.asList("a", "b", "c");
-		AssertUtil.assertIteratorEquals(collection1.iterator(), Arrays.asList().iterator(), Equaler.JavaEquals, TypeStringifier.JavaToString);
+		AssertUtil.assertIteratorEquals(collection1.iterator(), Arrays.asList().iterator(), DefaultEqualer.get(), TypeStringifier.JavaToString);
 	}
 
 	/**
@@ -104,7 +104,7 @@ public class AssertUtilTest {
 	public void differentOrderShouldFail() {
 		List<String> collection1 = Arrays.asList("a", "b", "c");
 		List<String> collection2 = Arrays.asList("b", "c", "a");
-		AssertUtil.assertIteratorEquals(collection1.iterator(), collection2.iterator(), Equaler.JavaEquals, TypeStringifier.JavaToString);
+		AssertUtil.assertIteratorEquals(collection1.iterator(), collection2.iterator(), DefaultEqualer.get(), TypeStringifier.JavaToString);
 	}
 
 }
