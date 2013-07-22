@@ -4,7 +4,7 @@
 
   <groupId>eu.stratosphere</groupId>
   <artifactId>pact-testplan</artifactId>
-  <version>0.3</version>
+  <version>0.2-ozone</version>
 
   <name>pact-testplan</name>
   <packaging>jar</packaging>
