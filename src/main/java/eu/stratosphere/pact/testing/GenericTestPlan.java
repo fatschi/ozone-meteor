@@ -540,8 +540,6 @@ public abstract class GenericTestPlan<T extends Record, Records extends GenericT
 		final Collection<GenericDataSink> existingSinks = this.getDataSinks();
 		final Collection<GenericDataSink> wrappedSinks = new ArrayList<GenericDataSink>();
 		for (final GenericDataSink fileSink : existingSinks) {
-			if (!(fileSink instanceof FileDataSink))
-				continue;
 			// need a format which is deserializable without configuration
 			if (!fileSink.getFormatClass().equals(SequentialOutputFormat.class)) {
 				Records expectedValues = this.expectedOutputs.get(fileSink);
@@ -726,5 +724,4 @@ public abstract class GenericTestPlan<T extends Record, Records extends GenericT
 			throw new IllegalStateException("Cannot create temporary file for prefix " + prefix, e);
 		}
 	}
-
 }

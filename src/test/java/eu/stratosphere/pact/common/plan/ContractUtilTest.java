@@ -23,8 +23,8 @@ import org.junit.Test;
 
 import eu.stratosphere.pact.common.contract.CoGroupContract;
 import eu.stratosphere.pact.common.contract.CrossContract;
-import eu.stratosphere.pact.common.contract.FileDataSink;
-import eu.stratosphere.pact.common.contract.FileDataSource;
+import eu.stratosphere.pact.common.contract.GenericDataSink;
+import eu.stratosphere.pact.common.contract.GenericDataSource;
 import eu.stratosphere.pact.common.contract.MapContract;
 import eu.stratosphere.pact.common.contract.MatchContract;
 import eu.stratosphere.pact.common.contract.ReduceContract;
@@ -105,7 +105,7 @@ public class ContractUtilTest {
 	@Test
 	public void getContractClassShouldReturnSinkForOutputFormat() {
 		final Class<?> result = ContractUtil.getContractClass(DelimitedOutputFormat.class);
-		assertEquals(FileDataSink.class, result);
+		assertEquals(GenericDataSink.class, result);
 	}
 
 	/**
@@ -114,7 +114,7 @@ public class ContractUtilTest {
 	@Test
 	public void getContractClassShouldReturnSourceForInputFormat() {
 		final Class<?> result = ContractUtil.getContractClass(DelimitedInputFormat.class);
-		assertEquals(FileDataSource.class, result);
+		assertEquals(GenericDataSource.class, result);
 	}
 
 	static class CoGrouper extends CoGroupStub {
