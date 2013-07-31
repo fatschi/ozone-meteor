@@ -17,7 +17,6 @@ package eu.stratosphere.pact.testing;
 
 import java.util.Collection;
 
-import eu.stratosphere.pact.common.contract.FileDataSink;
 import eu.stratosphere.pact.common.contract.GenericDataSink;
 import eu.stratosphere.pact.common.contract.GenericDataSource;
 import eu.stratosphere.pact.common.type.PactRecord;
