@@ -23,9 +23,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import junit.framework.Assert;
-
-import org.junit.internal.ArrayComparisonFailure;
+import org.junit.Assert;
 
 import eu.stratosphere.nephele.configuration.Configuration;
 import eu.stratosphere.nephele.services.memorymanager.MemoryAllocationException;
@@ -202,7 +200,7 @@ public class GenericTestRecords<T extends Record> implements Closeable, Iterable
 	 *        the records to add
 	 * @return this
 	 */
-	public GenericTestRecords<T> add(final T... records) {
+	public GenericTestRecords<T> add(@SuppressWarnings("unchecked") final T... records) {
 		for (final T record : records)
 			this.records.add(record);
 		this.setEmpty(false);

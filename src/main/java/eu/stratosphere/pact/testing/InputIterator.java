@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import eu.stratosphere.nephele.types.Record;
 import eu.stratosphere.nephele.util.StringUtils;
 import eu.stratosphere.pact.generic.io.InputFormat;
@@ -75,7 +75,6 @@ public class InputIterator<T extends Record> implements Iterator<T>, Closeable {
 		this.loadNextPair();
 	}
 
-	@SuppressWarnings("unchecked")
 	public InputIterator(TypeSerializer<T> serializer, final InputFormat<T, ?> inputFormats) {
 		this(serializer, Arrays.asList(inputFormats));
 	}
