@@ -60,6 +60,8 @@ public class JavaToJsonMapper extends AbstractTypeMapper<TypeMapper<?, ?>> {
 		this.addDefaultTypeMapping(Float.class, DoubleNode.class);
 		this.addDefaultTypeMapping(Float.TYPE, DoubleNode.class);
 		this.addDefaultTypeMapping(CharSequence.class, TextNode.class);
+		this.addDefaultTypeMapping(Character.class, TextNode.class);
+		this.addDefaultTypeMapping(Character.TYPE, TextNode.class);
 		this.addDefaultTypeMapping(Boolean.class, BooleanNode.class);
 		this.addDefaultTypeMapping(Boolean.TYPE, BooleanNode.class);
 		this.addDefaultTypeMapping(Enum.class, TextNode.class);

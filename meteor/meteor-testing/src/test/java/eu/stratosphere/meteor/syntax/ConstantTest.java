@@ -22,6 +22,7 @@ import eu.stratosphere.sopremo.expressions.ComparativeExpression;
 import eu.stratosphere.sopremo.expressions.ComparativeExpression.BinaryOperator;
 import eu.stratosphere.sopremo.expressions.ConstantExpression;
 import eu.stratosphere.sopremo.expressions.ObjectAccess;
+import eu.stratosphere.sopremo.expressions.TernaryExpression;
 import eu.stratosphere.sopremo.io.Sink;
 import eu.stratosphere.sopremo.io.Source;
 import eu.stratosphere.sopremo.operator.SopremoPlan;
@@ -47,6 +48,31 @@ public class ConstantTest extends MeteorParseTest {
 			withCondition(new ComparativeExpression(new ObjectAccess("l_linenumber"),
 				BinaryOperator.GREATER_EQUAL,
 				new ConstantExpression(1)));
+
+		final Sink sink = new Sink("file://q1.json").withInputs(filter);
+		final SopremoPlan expectedPlan = new SopremoPlan();
+		expectedPlan.setSinks(sink);
+
+		assertPlanEquals(expectedPlan, actualPlan);
+	} 
+	
+	/**
+	 * 
+	 */
+	@Test
+	public void testConstantInTernary() {
+		final SopremoPlan actualPlan =
+			this.parseScript("switchAtoB = 1; a = 'x'; b = 'y';" + 
+				"$li = read from 'file://lineitem.json';\n" +
+				"$li = filter $li where $li.l_itemname == (switchAtoB ? a : b);\n" +
+				"write $li to 'file://q1.json';\n");
+
+		final Source input = new Source("file://lineitem.json");
+		final Selection filter = new Selection().
+			withInputs(input).
+			withCondition(new ComparativeExpression(new ObjectAccess("l_itemname"),
+				BinaryOperator.EQUAL,
+				new TernaryExpression(new ConstantExpression(1), new ConstantExpression('x'), new ConstantExpression('y'))));
 
 		final Sink sink = new Sink("file://q1.json").withInputs(filter);
 		final SopremoPlan expectedPlan = new SopremoPlan();

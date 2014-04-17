@@ -404,21 +404,21 @@ public class ObjectCreation extends EvaluationExpression {
 		protected abstract void evaluate(IJsonNode node, IObjectNode target);
 	}
 
-	public static class TagMapping extends Mapping<EvaluationExpression> {
+	public static class SymbolicAssignment extends Mapping<EvaluationExpression> {
 		/**
-		 * Initializes TagMapping.
+		 * Initializes SymbolicAssignment.
 		 * 
 		 * @param target
 		 * @param expression
 		 */
-		public TagMapping(final EvaluationExpression target, final EvaluationExpression expression) {
+		public SymbolicAssignment(final EvaluationExpression target, final EvaluationExpression expression) {
 			super(target, expression);
 		}
 
 		/**
-		 * Initializes ObjectCreation.TagMapping.
+		 * Initializes ObjectCreation.SymbolicAssignment.
 		 */
-		TagMapping() {
+		SymbolicAssignment() {
 		}
 
 		/*
