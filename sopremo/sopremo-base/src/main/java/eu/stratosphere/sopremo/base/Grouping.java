@@ -276,6 +276,7 @@ public class Grouping extends CompositeOperator<Grouping> {
 			if (!(aggregationExpression.getAggregation() instanceof AssociativeAggregation))
 				return new GroupProjection().withResultProjection(resultProjection).
 					withKeyExpression(0, this.getGroupingKey(0).clone().remove(new InputSelection(0))).
+					withInnerGroupOrdering(0, this.innerGroupOrders.get(0)).
 					withInputs(module.getInputs());
 
 		// first project all tuples to an array with a slot for each aggregation
