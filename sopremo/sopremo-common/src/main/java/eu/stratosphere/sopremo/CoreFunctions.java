@@ -38,7 +38,6 @@ import eu.stratosphere.sopremo.tokenizer.RegexTokenizer;
 import eu.stratosphere.sopremo.type.ArrayNode;
 import eu.stratosphere.sopremo.type.BooleanNode;
 import eu.stratosphere.sopremo.type.CachingArrayNode;
-import eu.stratosphere.sopremo.type.DoubleNode;
 import eu.stratosphere.sopremo.type.IArrayNode;
 import eu.stratosphere.sopremo.type.IJsonNode;
 import eu.stratosphere.sopremo.type.INumericNode;
@@ -207,21 +206,6 @@ public class CoreFunctions implements BuiltinProvider {
 		}
 	};
 	
-	@Name(verb = "abs")
-	public static final SopremoFunction ABS = new SopremoFunction1<INumericNode>() {
-		/**
-		 * returns the absolute value of a number
-		 * 
-		 * @param number
-		 *        the number the absolute value should be returned
-		 * @return absolute value of the number
-		 */
-		@Override
-		protected IJsonNode call(final INumericNode number) {
-			return new DoubleNode(Math.abs(number.getDoubleValue()));
-		}
-	};
-
 	@Name(noun = "camelCase")
 	public static final SopremoFunction CAMEL_CASE = new SopremoFunction1<TextNode>() {
 		private transient StringBuilder builder = new StringBuilder();
