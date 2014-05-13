@@ -65,6 +65,19 @@ public class ArrayCreation extends EvaluationExpression {
 		this.elements.add(expression);
 		return this;
 	}
+	
+	/**
+	 * Sets the elements to the specified value.
+	 *
+	 * @param elements the elements to set
+	 */
+	public void setElements(List<EvaluationExpression> elements) {
+		if (elements == null)
+			throw new NullPointerException("elements must not be null");
+
+		this.elements.clear();;
+		this.elements.addAll(elements);
+	}
 
 	@Override
 	public void appendAsString(final Appendable appendable) throws IOException {

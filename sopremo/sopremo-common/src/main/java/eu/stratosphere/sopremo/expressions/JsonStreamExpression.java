@@ -19,6 +19,10 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoCopyable;
+import com.esotericsoftware.kryo.KryoSerializable;
+
 import javolution.text.TypeFormat;
 import eu.stratosphere.api.common.io.InputFormat;
 import eu.stratosphere.api.common.operators.GenericDataSource;
@@ -41,14 +45,14 @@ import eu.stratosphere.util.reflect.ReflectUtil;
 /**
  * Tag expression for nested operators.
  */
-public class JsonStreamExpression extends EvaluationExpression {
+public class JsonStreamExpression extends EvaluationExpression implements KryoCopyable<JsonStreamExpression>, KryoSerializable {
 	private final JsonStream stream;
 
 	private final int inputIndex;
 
 	private transient WeakReference<JsonStreamExpression> equalStream;
 
-	private IJsonNode values;
+	private transient IJsonNode values;
 
 	/**
 	 * Initializes a JsonStreamExpression with the given index.
@@ -82,6 +86,25 @@ public class JsonStreamExpression extends EvaluationExpression {
 		this.stream = stream;
 		this.inputIndex = inputIndex;
 	}
+	
+	/* (non-Javadoc)
+	 * @see com.esotericsoftware.kryo.KryoSerializable#write(com.esotericsoftware.kryo.Kryo, com.esotericsoftware.kryo.io.Output)
+	 */
+	@Override
+	public void write(Kryo kryo, com.esotericsoftware.kryo.io.Output output) {
+		throw new IllegalStateException("Cannot serialize JsonStreamExpression");
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.esotericsoftware.kryo.KryoCopyable#copy(com.esotericsoftware.kryo.Kryo)
+	 */
+	@Override
+	public JsonStreamExpression copy(Kryo kryo) {
+		return new JsonStreamExpression(this.stream, this.inputIndex);
+	}
+	
+	@Override
+	public void read(Kryo kryo, com.esotericsoftware.kryo.io.Input input) {};
 
 	/**
 	 * Initializes JsonStreamExpression.

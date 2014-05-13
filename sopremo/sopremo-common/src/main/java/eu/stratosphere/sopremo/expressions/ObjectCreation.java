@@ -155,6 +155,34 @@ public class ObjectCreation extends EvaluationExpression {
 	}
 
 	/**
+	 * Returns the mapping at the specified index
+	 * 
+	 * @param index
+	 *        the index of the mapping that should be returned
+	 * @return the mapping at the specified index
+	 */
+	public Mapping<?> getMapping(final String fieldName) {
+		for (Mapping<?> mapping : mappings)
+			if (mapping.getTarget().equals(fieldName))
+				return mapping;
+		return null;
+	}
+
+	/**
+	 * Returns the mapping at the specified index
+	 * 
+	 * @param index
+	 *        the index of the mapping that should be returned
+	 * @return the mapping at the specified index
+	 */
+	public EvaluationExpression getExpression(final String fieldName) {
+		Mapping<?> mapping = getMapping(fieldName);
+		if (mapping == null)
+			return null;
+		return mapping.getExpression();
+	}
+
+	/**
 	 * Returns the mappings
 	 * 
 	 * @return the mappings

@@ -86,6 +86,13 @@ public class SopremoUtil {
 				String.format("Cannot use the given function as it does not accept %d arguments", numberOfArguments));
 	}
 
+	@SuppressWarnings("unchecked")
+	public static <V> V cast(Object object, Class<V> expectedClass, String error) {
+		if (expectedClass.isInstance(object))
+			return (V) object;
+		throw new IllegalArgumentException(error);
+	}
+
 	/**
 	 * Configures an object with the given {@link Configuration} that has been initialized with
 	 * {@link #transferFieldsToConfiguration(Object, Class, Configuration, Class, Class)}.

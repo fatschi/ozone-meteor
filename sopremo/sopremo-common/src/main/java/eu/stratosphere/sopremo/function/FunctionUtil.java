@@ -14,6 +14,8 @@
  **********************************************************************************************************************/
 package eu.stratosphere.sopremo.function;
 
+import java.util.List;
+
 import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 
@@ -68,6 +70,16 @@ public class FunctionUtil {
 		return createMethodCall(callable, null, params);
 	}
 
+	public static EvaluationExpression createFunctionCall(final Aggregation aggregation,
+			final List<EvaluationExpression> params) {
+		return createMethodCall(new AggregationFunction(aggregation), null, params.toArray(new EvaluationExpression[params.size()]));
+	}
+
+	public static EvaluationExpression createFunctionCall(final Callable<?, ?> callable,
+			final List<EvaluationExpression> params) {
+		return createMethodCall(callable, null, params.toArray(new EvaluationExpression[params.size()]));
+	}
+
 	public static EvaluationExpression createFunctionCall(final Class<?> methodProvider, final String methodName,
 			final EvaluationExpression... params) {
 		final DefaultFunctionRegistry registry = new DefaultFunctionRegistry();
@@ -76,8 +88,7 @@ public class FunctionUtil {
 	}
 
 	public static EvaluationExpression createMethodCall(final Callable<?, ?> callable,
-			final EvaluationExpression object,
-			EvaluationExpression... params) {
+			final EvaluationExpression object, EvaluationExpression... params) {
 		if (callable instanceof MacroBase)
 			return ((MacroBase) callable).call(params);
 		if (!(callable instanceof SopremoFunction))
