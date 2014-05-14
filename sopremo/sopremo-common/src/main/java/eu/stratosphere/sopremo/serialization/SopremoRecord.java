@@ -18,6 +18,8 @@ import it.unimi.dsi.fastutil.bytes.ByteArrayList;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -112,6 +114,8 @@ public class SopremoRecord extends AbstractSopremoType implements ISopremoType {
 				MissingNode.class, TreeMap.class, ArrayList.class);
 		for (final Class<?> type : defaultTypes)
 			this.kryo.register(type);
+		this.kryo.register(BigDecimal.class);
+		this.kryo.register(BigInteger.class);
 		this.kryo.getRegistration(ObjectNode.class).setSerializer(new ObjectSerializer());
 		this.kryo.getRegistration(CachingArrayNode.class).setSerializer(new CachingArraySerializer());
 		this.kryo.registerAlias(IObjectNode.class, ObjectNode.class);

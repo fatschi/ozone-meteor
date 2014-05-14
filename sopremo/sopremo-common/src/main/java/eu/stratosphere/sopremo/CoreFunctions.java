@@ -467,6 +467,27 @@ public class CoreFunctions implements BuiltinProvider {
 			return this.union;
 		}
 	};
+	
+	@Name(verb = "arrayMerge")
+	public static final SopremoFunction ARRAY_MERGE = new SopremoVarargFunction1<IStreamNode<?>>() {
+		private final transient IArrayNode<IJsonNode> mergedArray = new ArrayNode<IJsonNode>();
+
+		@Override
+		protected IArrayNode<IJsonNode> call(final IStreamNode<?> array, final IArrayNode<IJsonNode> moreArrays) {
+			mergedArray.clear();
+			for(IJsonNode element: array){
+				if(element instanceof IArrayNode<?>){
+					mergedArray.addAll((IArrayNode<IJsonNode>)element);
+				} else if(element instanceof MissingNode){
+					continue;
+				}
+				else{
+					mergedArray.add(element);
+				}
+			}
+			return mergedArray;
+		}
+	};
 
 	@Name(noun = { "indexOf", "strpos" })
 	public static final SopremoFunction STRPOS = new SopremoFunction2<TextNode, TextNode>() {
