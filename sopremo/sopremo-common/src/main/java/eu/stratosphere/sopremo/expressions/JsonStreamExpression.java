@@ -19,11 +19,14 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.KryoCopyable;
-import com.esotericsoftware.kryo.KryoSerializable;
-
 import javolution.text.TypeFormat;
+
+import com.esotericsoftware.kryo.DefaultSerializer;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.Serializer;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.serializers.FieldSerializer;
+
 import eu.stratosphere.api.common.io.InputFormat;
 import eu.stratosphere.api.common.operators.GenericDataSource;
 import eu.stratosphere.configuration.Configuration;
@@ -45,12 +48,13 @@ import eu.stratosphere.util.reflect.ReflectUtil;
 /**
  * Tag expression for nested operators.
  */
-public class JsonStreamExpression extends EvaluationExpression implements KryoCopyable<JsonStreamExpression>, KryoSerializable {
-	private final JsonStream stream;
+@DefaultSerializer(JsonStreamExpression.JsonStreamExpressionSerializer.class)
+public class JsonStreamExpression extends EvaluationExpression {
+	private transient WeakReference<JsonStreamExpression> equalStream;
 
 	private final int inputIndex;
 
-	private transient WeakReference<JsonStreamExpression> equalStream;
+	private final JsonStream stream;
 
 	private transient IJsonNode values;
 
@@ -86,25 +90,6 @@ public class JsonStreamExpression extends EvaluationExpression implements KryoCo
 		this.stream = stream;
 		this.inputIndex = inputIndex;
 	}
-	
-	/* (non-Javadoc)
-	 * @see com.esotericsoftware.kryo.KryoSerializable#write(com.esotericsoftware.kryo.Kryo, com.esotericsoftware.kryo.io.Output)
-	 */
-	@Override
-	public void write(Kryo kryo, com.esotericsoftware.kryo.io.Output output) {
-		throw new IllegalStateException("Cannot serialize JsonStreamExpression");
-	}
-	
-	/* (non-Javadoc)
-	 * @see com.esotericsoftware.kryo.KryoCopyable#copy(com.esotericsoftware.kryo.Kryo)
-	 */
-	@Override
-	public JsonStreamExpression copy(Kryo kryo) {
-		return new JsonStreamExpression(this.stream, this.inputIndex);
-	}
-	
-	@Override
-	public void read(Kryo kryo, com.esotericsoftware.kryo.io.Input input) {};
 
 	/**
 	 * Initializes JsonStreamExpression.
@@ -148,6 +133,34 @@ public class JsonStreamExpression extends EvaluationExpression implements KryoCo
 		this.equalStream = new WeakReference<JsonStreamExpression>(other);
 		// here the actual recursion is very likely to occur
 		return thisSource.getOperator().equals(otherSource.getOperator());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see eu.stratosphere.sopremo.expressions.EvaluationExpression#evaluate(eu.stratosphere.sopremo.type.IJsonNode)
+	 */
+	@Override
+	public IJsonNode evaluate(final IJsonNode node) {
+		if (this.values == null) {
+			if (!(this.stream instanceof Source))
+				throw new IllegalStateException("Sopremo currently only supports Sources to be used as side channels");
+			Source source = (Source) this.stream;
+			if (source.isAdhoc())
+				this.values = source.getAdhocValues();
+			else {
+				final SopremoFormat format = source.getFormat();
+				final Configuration configuration = new Configuration();
+				final GenericDataSource<?> dataSource =
+					new GenericDataSource<InputFormat<?, ?>>(format.getInputFormat());
+				format.configureForInput(configuration, dataSource, source.getInputPath());
+				try {
+					this.values = this.readValues(format, configuration, this.getInputs(source));
+				} catch (final Throwable e) {
+					throw new IllegalStateException("Cannot read values from side channel", e);
+				}
+			}
+		}
+		return this.values;
 	}
 
 	/**
@@ -211,32 +224,18 @@ public class JsonStreamExpression extends EvaluationExpression implements KryoCo
 		return inputSelection;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see eu.stratosphere.sopremo.expressions.EvaluationExpression#evaluate(eu.stratosphere.sopremo.type.IJsonNode)
-	 */
-	@Override
-	public IJsonNode evaluate(final IJsonNode node) {
-		if (this.values == null) {
-			if (!(this.stream instanceof Source))
-				throw new IllegalStateException("Sopremo currently only supports Sources to be used as side channels");
-			Source source = (Source) this.stream;
-			if (source.isAdhoc())
-				this.values = source.getAdhocValues();
-			else {
-				final SopremoFormat format = source.getFormat();
-				final Configuration configuration = new Configuration();
-				final GenericDataSource<?> dataSource =
-					new GenericDataSource<InputFormat<?, ?>>(format.getInputFormat());
-				format.configureForInput(configuration, dataSource, source.getInputPath());
-				try {
-					this.values = readValues(format, configuration, getInputs(source));
-				} catch (final Throwable e) {
-					throw new IllegalStateException("Cannot read values from side channel", e);
-				}
-			}
-		}
-		return this.values;
+	private List<Path> getInputs(Source source) throws IOException {
+		final List<Path> inputs = new ArrayList<Path>();
+
+		Path nephelePath = new Path(source.getInputPath());
+		FileSystem fs = nephelePath.getFileSystem();
+		FileStatus fileStatus = fs.getFileStatus(nephelePath);
+		if (!fileStatus.isDir())
+			inputs.add(fileStatus.getPath());
+		else
+			for (FileStatus status : fs.listStatus(nephelePath))
+				inputs.add(status.getPath());
+		return inputs;
 	}
 
 	private IArrayNode<IJsonNode> readValues(final SopremoFormat format, final Configuration configuration, final List<Path> inputs)
@@ -258,18 +257,47 @@ public class JsonStreamExpression extends EvaluationExpression implements KryoCo
 		return array;
 	}
 
-	private List<Path> getInputs(Source source) throws IOException {
-		final List<Path> inputs = new ArrayList<Path>();
+	/**
+	 * @author arvid
+	 */
+	public static class JsonStreamExpressionSerializer extends Serializer<JsonStreamExpression> {
+		private final FieldSerializer<JsonStreamExpression> delegate;
 
-		Path nephelePath = new Path(source.getInputPath());
-		FileSystem fs = nephelePath.getFileSystem();
-		FileStatus fileStatus = fs.getFileStatus(nephelePath);
-		if (!fileStatus.isDir())
-			inputs.add(fileStatus.getPath());
-		else {
-			for (FileStatus status : fs.listStatus(nephelePath))
-				inputs.add(status.getPath());
+		/**
+		 * Initializes JsonStreamExpression.JsonStreamExpressionSerializer.
+		 */
+		public JsonStreamExpressionSerializer(Kryo kryo) {
+			this.delegate = new FieldSerializer<JsonStreamExpression>(kryo, JsonStreamExpression.class);
 		}
-		return inputs;
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.esotericsoftware.kryo.Serializer#copy(com.esotericsoftware.kryo.Kryo, java.lang.Object)
+		 */
+		@Override
+		public JsonStreamExpression copy(Kryo kryo, JsonStreamExpression original) {
+			return new JsonStreamExpression(original.stream, original.inputIndex);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.esotericsoftware.kryo.Serializer#read(com.esotericsoftware.kryo.Kryo,
+		 * com.esotericsoftware.kryo.io.Input, java.lang.Class)
+		 */
+		@Override
+		public JsonStreamExpression read(Kryo kryo, Input input, Class<JsonStreamExpression> type) {
+			return this.delegate.read(kryo, input, type);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see com.esotericsoftware.kryo.Serializer#write(com.esotericsoftware.kryo.Kryo,
+		 * com.esotericsoftware.kryo.io.Output, java.lang.Object)
+		 */
+		@Override
+		public void write(Kryo kryo, com.esotericsoftware.kryo.io.Output output, JsonStreamExpression object) {
+			this.delegate.write(kryo, output, object);
+		}
+
 	}
 }
