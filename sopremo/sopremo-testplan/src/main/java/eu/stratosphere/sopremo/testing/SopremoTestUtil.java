@@ -29,6 +29,7 @@ import com.esotericsoftware.kryo.io.Output;
 
 import eu.stratosphere.sopremo.operator.Operator;
 import eu.stratosphere.sopremo.operator.SopremoPlan;
+import eu.stratosphere.util.SopremoKryo;
 
 /**
  */
@@ -46,12 +47,8 @@ public class SopremoTestUtil {
 		// thus, these operators are not equal to the expected plan as the operators are loaded by the default
 		// classloader
 		// one solution is to use the serializer/deserializer trick to transfer the classes to the default classloader
-		final Kryo kryo = expectedPlan.getCompilationContext().getKryo();
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		final Output output = new Output(baos);
-		kryo.writeObject(output, actualPlan);
-		output.close();
-		actualPlan = kryo.readObject(new Input(baos.toByteArray()), SopremoPlan.class);
+		final Kryo kryo = new SopremoKryo();
+		actualPlan = transferToClassManager(actualPlan, kryo);
 
 		final List<Operator<?>> unmatchingOperators = actualPlan.getUnmatchingOperators(expectedPlan);
 		if (!unmatchingOperators.isEmpty())
@@ -60,6 +57,15 @@ public class SopremoTestUtil {
 					unmatchingOperators.get(0));
 			else
 				Assert.fail("plans are different\nexpected: " + expectedPlan + "\nbut was: " + actualPlan);
+	}
+
+	public static SopremoPlan transferToClassManager(SopremoPlan actualPlan, final Kryo kryo) {
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final Output output = new Output(baos);
+		kryo.writeObject(output, actualPlan);
+		output.close();
+		actualPlan = kryo.readObject(new Input(baos.toByteArray()), SopremoPlan.class);
+		return actualPlan;
 	}
 
 	public static String createTemporaryFile(final String prefix) {

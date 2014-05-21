@@ -130,7 +130,7 @@ public final class SopremoRecordComparator extends TypeComparator<SopremoRecord>
 	@Override
 	public boolean equalToReference(final SopremoRecord candidate) {
 		final IJsonNode node = candidate.getNode();
-		if (node == null) {
+		if (node == null)
 			for (int index = 0; index < this.keyExpressionIndices.length; index++) {
 				if (DEBUG)
 					SopremoUtil.LOG.debug(String.format(
@@ -142,7 +142,6 @@ public final class SopremoRecordComparator extends TypeComparator<SopremoRecord>
 				if (!candidate.getKey(this.keyExpressionIndices[index], this.nodeCache2[index]).equals(this.keys[index]))
 					return false;
 			}
-		}
 		else
 			for (int index = 0; index < this.keyExpressionIndices.length; index++) {
 				if (DEBUG)

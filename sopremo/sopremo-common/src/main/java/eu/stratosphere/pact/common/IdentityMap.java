@@ -24,6 +24,7 @@ import eu.stratosphere.util.Collector;
  * Trivial PACT stub which emits the pairs without modifications.
  */
 public class IdentityMap extends AbstractFunction implements GenericMapper<SopremoRecord, SopremoRecord> {
+	private transient SopremoRecord writeRecord = new SopremoRecord();
 	/*
 	 * (non-Javadoc)
 	 * @see eu.stratosphere.api.record.functions.MapFunction#map(eu.stratosphere.types.PactRecord,
@@ -31,6 +32,7 @@ public class IdentityMap extends AbstractFunction implements GenericMapper<Sopre
 	 */
 	@Override
 	public void map(final SopremoRecord record, final Collector<SopremoRecord> out) {
-		out.collect(record);
+		this.writeRecord.setNode(record.getNode());
+		out.collect(this.writeRecord);
 	}
 }

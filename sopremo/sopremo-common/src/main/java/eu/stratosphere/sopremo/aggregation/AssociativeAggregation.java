@@ -75,7 +75,7 @@ public abstract class AssociativeAggregation<ElementType extends IJsonNode> exte
 		public AssociativeAggregation<?> read(final Kryo kryo, final Input input,
 				final Class<AssociativeAggregation<?>> type) {
 			if (type.isAnonymousClass())
-				return ReflectUtil.newInstance(type, kryo.readClassAndObject(input));
+				return ReflectUtil.newInstance(type,  kryo.readClassAndObject(input));
 			return kryo.newInstance(type);
 		}
 

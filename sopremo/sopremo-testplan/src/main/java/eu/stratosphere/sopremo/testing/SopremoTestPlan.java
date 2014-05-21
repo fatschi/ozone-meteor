@@ -37,12 +37,12 @@ import eu.stratosphere.sopremo.io.Source;
 import eu.stratosphere.sopremo.operator.JsonStream;
 import eu.stratosphere.sopremo.operator.Operator;
 import eu.stratosphere.sopremo.operator.OperatorNavigator;
-import eu.stratosphere.sopremo.operator.PlanWithSopremoPostPass;
 import eu.stratosphere.sopremo.operator.SopremoModule;
 import eu.stratosphere.sopremo.operator.SopremoPlan;
 import eu.stratosphere.sopremo.packages.ITypeRegistry;
 import eu.stratosphere.sopremo.pact.SopremoUtil;
 import eu.stratosphere.sopremo.pact.UntypedRecordToJsonIterator;
+import eu.stratosphere.sopremo.serialization.PlanWithSopremoPostPass;
 import eu.stratosphere.sopremo.serialization.SopremoRecord;
 import eu.stratosphere.sopremo.serialization.SopremoRecordLayout;
 import eu.stratosphere.sopremo.type.IJsonNode;
@@ -355,10 +355,11 @@ public class SopremoTestPlan {
 		final SopremoRecordLayout layout = sopremoPlan.getLayout();
 		final ITypeRegistry typeRegistry = sopremoPlan.getTypeRegistry();
 		this.testPlan = new SopremoRecordTestPlan(layout, typeRegistry, sinks);
+		final SopremoRecordLayout emptyLayout = SopremoRecordLayout.create();
 		for (final Input input : this.inputs)
-			input.prepare(this.testPlan, layout, typeRegistry);
+			input.prepare(this.testPlan, emptyLayout, typeRegistry);
 		for (final ExpectedOutput output : this.expectedOutputs)
-			output.prepare(this.testPlan, layout, typeRegistry);
+			output.prepare(this.testPlan, emptyLayout, typeRegistry);
 		if (this.dop > 0)
 			this.testPlan.setDegreeOfParallelism(this.dop);
 		if (this.trace)
@@ -754,7 +755,7 @@ public class SopremoTestPlan {
 
 		protected SopremoRecordTestPlan(final SopremoRecordLayout layout, final ITypeRegistry typeRegistry,
 				final Collection<? extends eu.stratosphere.api.common.operators.Operator> contracts) {
-			super(SopremoTestRecords.getTypeConfig(layout, typeRegistry), contracts);
+			super(SopremoTestRecords.getTypeConfig(SopremoRecordLayout.create(), typeRegistry), contracts);
 			this.layout = layout;
 			this.typeRegistry = typeRegistry;
 		}

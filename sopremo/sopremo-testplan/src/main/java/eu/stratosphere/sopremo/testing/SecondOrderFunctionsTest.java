@@ -31,7 +31,7 @@ import eu.stratosphere.sopremo.expressions.ComparativeExpression.BinaryOperator;
 import eu.stratosphere.sopremo.expressions.ConstantExpression;
 import eu.stratosphere.sopremo.expressions.InputSelection;
 import eu.stratosphere.sopremo.function.ExpressionFunction;
-import eu.stratosphere.sopremo.function.FunctionNode;
+import eu.stratosphere.sopremo.type.FunctionNode;
 import eu.stratosphere.sopremo.type.JsonUtil;
 
 /**

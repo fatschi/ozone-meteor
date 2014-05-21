@@ -14,12 +14,17 @@
  **********************************************************************************************************************/
 package eu.stratosphere.meteor;
 
+import java.text.DecimalFormat;
+
 import org.junit.Test;
 
 import eu.stratosphere.sopremo.io.CsvFormat;
 import eu.stratosphere.sopremo.io.Sink;
 import eu.stratosphere.sopremo.io.Source;
 import eu.stratosphere.sopremo.operator.SopremoPlan;
+import eu.stratosphere.sopremo.type.DecimalNode;
+import eu.stratosphere.sopremo.type.IntNode;
+import eu.stratosphere.sopremo.type.TextNode;
 
 /**
  */
@@ -34,6 +39,21 @@ public class CsvTest extends MeteorParseTest {
 
 		final SopremoPlan expectedPlan = new SopremoPlan();
 		final Source input = new Source(new CsvFormat().withKeyNames("A", "B", "C"), "file://input.any");
+		final Sink output = new Sink("file://output.json").withInputs(input);
+		expectedPlan.setSinks(output);
+
+		assertPlanEquals(expectedPlan, actualPlan);
+	}
+	
+	@Test
+	public void shouldConfigureColumnTypes() {
+		final SopremoPlan actualPlan = this.parseScript(
+			"$input = read csv from 'file://input.any'" +
+				"  types [int, numeric, text];\n" +
+				"write $input to 'file://output.json';");
+
+		final SopremoPlan expectedPlan = new SopremoPlan();
+		final Source input = new Source(new CsvFormat().withTypes(IntNode.class, DecimalNode.class, TextNode.class), "file://input.any");
 		final Sink output = new Sink("file://output.json").withInputs(input);
 		expectedPlan.setSinks(output);
 
@@ -98,6 +118,36 @@ public class CsvTest extends MeteorParseTest {
 		assertPlanEquals(expectedPlan, actualPlan);
 	}
 
+	@Test
+	public void shouldConfigureHeaderOff() {
+		final SopremoPlan actualPlan = this.parseScript(
+			"$input = read csv from 'file://input.any'" +
+				"  header false;\n" +
+				"write $input to 'file://output.json';");
+
+		final SopremoPlan expectedPlan = new SopremoPlan();
+		final Source input = new Source(new CsvFormat().withHeader(false), "file://input.any");
+		final Sink output = new Sink("file://output.json").withInputs(input);
+		expectedPlan.setSinks(output);
+
+		assertPlanEquals(expectedPlan, actualPlan);
+	}
+
+	@Test
+	public void shouldConfigureHeaderOn() {
+		final SopremoPlan actualPlan = this.parseScript(
+			"$input = read csv from 'file://input.any'" +
+				"  header true;\n" +
+				"write $input to 'file://output.json';");
+
+		final SopremoPlan expectedPlan = new SopremoPlan();
+		final Source input = new Source(new CsvFormat().withHeader(true), "file://input.any");
+		final Sink output = new Sink("file://output.json").withInputs(input);
+		expectedPlan.setSinks(output);
+
+		assertPlanEquals(expectedPlan, actualPlan);
+	}
+	
 	@Test
 	public void shouldDetectCsv() {
 		final SopremoPlan actualPlan = this.parseScript(

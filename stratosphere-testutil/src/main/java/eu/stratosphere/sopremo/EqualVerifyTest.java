@@ -19,14 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
@@ -48,7 +41,7 @@ import eu.stratosphere.util.KryoUtil;
  * @param <T>
  */
 @Ignore
-public abstract class EqualVerifyTest<T> {
+public abstract class EqualVerifyTest<T> extends TestBase {
 	protected T first, second;
 
 	protected Collection<T> more;

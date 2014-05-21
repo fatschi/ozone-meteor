@@ -197,7 +197,7 @@ public class ObjectNode extends AbstractJsonNode implements IObjectNode, KryoCop
 		return this.children.size();
 	}
 
-	public static class ObjectSerializer extends ReusingSerializer<IObjectNode> {
+	public static class ObjectSerializer extends AbstractReusingSerializer<IObjectNode> {
 		private final Set<String> currentKeys = new FastSet<String>();
 
 		/*

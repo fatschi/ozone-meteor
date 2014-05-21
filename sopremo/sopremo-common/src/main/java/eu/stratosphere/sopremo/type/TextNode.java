@@ -31,9 +31,7 @@ public class TextNode extends AbstractJsonNode implements IPrimitiveNode,
 	}
 
 	/**
-	 * Initializes a TextNode which represents the given <code>String</code>. To
-	 * create new TextNodes please use TextNode.valueOf(<code>String</code>)
-	 * instead.
+	 * Initializes a TextNode which represents the given <code>CharSequence</code>. 
 	 * 
 	 * @param v
 	 *        the value that should be represented by this node
@@ -41,6 +39,20 @@ public class TextNode extends AbstractJsonNode implements IPrimitiveNode,
 	public TextNode(final CharSequence v) {
 		for (int index = 0, count = v.length(); index < count; index++)
 			this.value.add(v.charAt(index));
+	}
+
+	/**
+	 * Initializes a TextNode which represents the given <code>String</code>. To
+	 * create new TextNodes please use TextNode.valueOf(<code>String</code>)
+	 * instead.
+	 * 
+	 * @param v
+	 *        the value that should be represented by this node
+	 */
+	public TextNode(final String v) {
+		final int length = v.length();
+		this.value.size(length);
+		v.getChars(0, length, this.value.elements(), 0);
 	}
 
 	/*
@@ -226,6 +238,11 @@ public class TextNode extends AbstractJsonNode implements IPrimitiveNode,
 		for (int index = start; index < end; index++)
 			this.value.add(text.charAt(index));
 	}
+	
+	public void setValue(final String text, final int start, final int end) {
+		this.value.size(end - start);
+		text.getChars(start, end, this.value.elements(), 0);
+	}
 
 	public void setValue(final TextNode text, final int start, final int end) {
 		this.value.size(end - start);
@@ -283,7 +300,7 @@ public class TextNode extends AbstractJsonNode implements IPrimitiveNode,
 		return new TextNode(v);
 	}
 
-	public static class TextNodeSerializer extends ReusingSerializer<TextNode> {
+	public static class TextNodeSerializer extends AbstractReusingSerializer<TextNode> {
 		/*
 		 * (non-Javadoc)
 		 * @see

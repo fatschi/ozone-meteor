@@ -15,6 +15,7 @@ import eu.stratosphere.sopremo.SopremoEnvironment;
 import eu.stratosphere.sopremo.io.Sink;
 import eu.stratosphere.sopremo.packages.DefaultTypeRegistry;
 import eu.stratosphere.sopremo.packages.ITypeRegistry;
+import eu.stratosphere.sopremo.serialization.PlanWithSopremoPostPass;
 import eu.stratosphere.sopremo.serialization.SopremoRecordLayout;
 
 /**

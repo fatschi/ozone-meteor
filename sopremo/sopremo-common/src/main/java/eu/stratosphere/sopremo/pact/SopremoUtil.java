@@ -35,6 +35,7 @@ import eu.stratosphere.sopremo.function.SopremoFunction;
 import eu.stratosphere.sopremo.type.IArrayNode;
 import eu.stratosphere.sopremo.type.IJsonNode;
 import eu.stratosphere.sopremo.type.IObjectNode;
+import eu.stratosphere.sopremo.type.AbstractReusingSerializer;
 import eu.stratosphere.sopremo.type.ReusingSerializer;
 import eu.stratosphere.sopremo.type.typed.ITypedObjectNode;
 import eu.stratosphere.sopremo.type.typed.TypedObjectNode;
@@ -188,9 +189,11 @@ public class SopremoUtil {
 	@SuppressWarnings("unchecked")
 	public static <T> T deserializeInto(final Kryo kryo, final Input input, final T oldNode) {
 		final Registration registration = kryo.readClass(input);
+		if(registration == null)
+			return null;
 
 		final Serializer<T> serializer = registration.getSerializer();
-		if (serializer instanceof ReusingSerializer<?> && registration.getType() == oldNode.getClass())
+		if (oldNode != null && serializer instanceof ReusingSerializer<?> && registration.getType() == oldNode.getClass())
 			return ((ReusingSerializer<T>) serializer).read(kryo, input, oldNode, registration.getType());
 		return serializer.read(kryo, input, registration.getType());
 	}

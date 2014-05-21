@@ -4,8 +4,9 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import eu.stratosphere.core.testing.TestPlan;
 import eu.stratosphere.sopremo.testing.SopremoTestPlan;
+import eu.stratosphere.sopremo.type.IntNode;
+import eu.stratosphere.sopremo.type.TextNode;
 
 public class CsvInputFormatTest {
 
@@ -128,6 +129,58 @@ public class CsvInputFormatTest {
 	public void shouldParseCsvWithoutNewline() throws IOException {
 		final Source read =
 			new Source(new CsvFormat(), this.getResource("CsvInputFormat/restaurant_short_wo_newline.csv"));
+
+		final SopremoTestPlan testPlan = new SopremoTestPlan(read); // write
+
+		testPlan.getExpectedOutput(0).
+			addObject("id", "1", "name", "arnie morton's of chicago",
+				"addr", "435 s. la cienega blv.", "city", "los angeles",
+				"phone", "310/246-1501", "type", "american", "class", "'0'").
+			addObject("id", "2", "name", "\"arnie morton's of chicago\"",
+				"addr", "435 s. la cienega blv.", "city", "los,angeles",
+				"phone", "310/246-1501", "type", "american", "class", "'0'").
+			addObject("id", "3", "name", "arnie morton's of chicago",
+				"addr", "435 s. la cienega blv.", "city", "los\nangeles", "phone", "310/246-1501",
+				"type", "american", "class", "'0'");
+
+		testPlan.run();
+	}
+
+	/**
+	 * Tests if a {@link TestPlan} can be executed.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void shouldParseTypes() throws IOException {
+		final Source read = new Source(new CsvFormat().withTypes(IntNode.class, TextNode.class),
+			this.getResource("CsvInputFormat/restaurant_short_wo_newline.csv"));
+
+		final SopremoTestPlan testPlan = new SopremoTestPlan(read); // write
+
+		testPlan.getExpectedOutput(0).
+			addObject("id", 1, "name", "arnie morton's of chicago",
+				"addr", "435 s. la cienega blv.", "city", "los angeles",
+				"phone", "310/246-1501", "type", "american", "class", "'0'").
+			addObject("id", 2, "name", "\"arnie morton's of chicago\"",
+				"addr", "435 s. la cienega blv.", "city", "los,angeles",
+				"phone", "310/246-1501", "type", "american", "class", "'0'").
+			addObject("id", 3, "name", "arnie morton's of chicago",
+				"addr", "435 s. la cienega blv.", "city", "los\nangeles", "phone", "310/246-1501",
+				"type", "american", "class", "'0'");
+
+		testPlan.run();
+	}
+
+	/**
+	 * Tests if a {@link TestPlan} can be executed.
+	 * 
+	 * @throws IOException
+	 */
+	@Test(expected = AssertionError.class)
+	public void shouldFailIfIncorrectTypes() throws IOException {
+		final Source read = new Source(new CsvFormat().withTypes(IntNode.class, IntNode.class),
+			this.getResource("CsvInputFormat/restaurant_short_wo_newline.csv"));
 
 		final SopremoTestPlan testPlan = new SopremoTestPlan(read); // write
 

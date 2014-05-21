@@ -230,7 +230,7 @@ public abstract class AbstractArrayNode<T extends IJsonNode> extends AbstractJso
 			result[i++] = node;
 	}
 
-	public static class ArraySerializer extends ReusingSerializer<ArrayNode<IJsonNode>> {
+	public static class ArraySerializer extends AbstractReusingSerializer<ArrayNode<IJsonNode>> {
 		/*
 		 * (non-Javadoc)
 		 * @see eu.stratosphere.sopremo.type.ReusingSerializer#read(com.esotericsoftware.kryo.Kryo,

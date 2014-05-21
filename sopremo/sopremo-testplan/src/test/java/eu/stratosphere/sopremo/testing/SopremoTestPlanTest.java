@@ -32,9 +32,11 @@ import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
 import eu.stratosphere.api.common.operators.base.ReduceOperatorBase.Combinable;
-import eu.stratosphere.api.java.record.operators.CrossOperator;
+import eu.stratosphere.sopremo.CoreFunctions;
 import eu.stratosphere.sopremo.EqualVerifyTest;
+import eu.stratosphere.sopremo.expressions.ConstantExpression;
 import eu.stratosphere.sopremo.expressions.ObjectAccess;
+import eu.stratosphere.sopremo.function.FunctionUtil;
 import eu.stratosphere.sopremo.io.Sink;
 import eu.stratosphere.sopremo.io.Source;
 import eu.stratosphere.sopremo.operator.ElementaryOperator;
@@ -169,12 +171,12 @@ public class SopremoTestPlanTest extends EqualVerifyTest<SopremoTestPlan> {
 
 		final SopremoTestPlan testPlan = new SopremoTestPlan(countWords);
 		final String[] lines =
-			{
-				"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-				"Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-				"Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-				"Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-			};
+		{
+			"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+			"Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+			"Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+			"Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+		};
 		for (final String line : lines)
 			testPlan.getInput(0).add(JsonUtil.createObjectNode("line", TextNode.valueOf(line.toLowerCase())));
 
@@ -198,6 +200,63 @@ public class SopremoTestPlanTest extends EqualVerifyTest<SopremoTestPlan> {
 	@Override
 	protected SopremoTestPlan createDefaultInstance(final int index) {
 		return new SopremoTestPlan(index, 1);
+	}
+
+	@Test
+	public void complexKeysShouldWorkInTrees() {
+		final TokenizeLine tokenize = new TokenizeLine();
+		final CountWords countWords = new CountWords().withInputs(tokenize).withKeyExpression(0,
+			FunctionUtil.createFunctionCall(CoreFunctions.SUBSTRING, new ObjectAccess("word"), new ConstantExpression(2)));
+
+		final SopremoTestPlan testPlan = new SopremoTestPlan(countWords);
+
+		testPlan.getInput(0).
+			addObject("line", "abc").
+			addObject("line", "abd").
+			addObject("line", "dbc");
+		testPlan.getExpectedOutput(0).
+			add(JsonUtil.createObjectNode("word", "abc", "count", 2)).
+			add(JsonUtil.createObjectNode("word", "abd", "count", 1));
+		testPlan.run();
+	}
+
+	@Test
+	public void complexKeysShouldWorkInDAG() {
+		final TokenizeLine tokenize = new TokenizeLine();
+		final CountWords countWords = new CountWords().withInputs(tokenize).withName("C1").withKeyExpression(0,
+			FunctionUtil.createFunctionCall(CoreFunctions.SUBSTRING, new ObjectAccess("word"), new ConstantExpression(2)));
+		final CountWords countWords2 = new CountWords().withInputs(tokenize).withName("C2").withKeyExpression(0,
+			FunctionUtil.createFunctionCall(CoreFunctions.SUBSTRING, new ObjectAccess("word"), new ConstantExpression(1)));
+
+		final SopremoTestPlan testPlan = new SopremoTestPlan(countWords, countWords2);
+
+		testPlan.getInput(0).
+			addObject("line", "abc").
+			addObject("line", "abd").
+			addObject("line", "dac");
+		testPlan.getExpectedOutput(0).
+			add(JsonUtil.createObjectNode("word", "abc", "count", 2)).
+			add(JsonUtil.createObjectNode("word", "abd", "count", 1));
+		testPlan.getExpectedOutput(1).
+			add(JsonUtil.createObjectNode("word", "abc", "count", 1)).
+			add(JsonUtil.createObjectNode("word", "abd", "count", 1)).
+			add(JsonUtil.createObjectNode("word", "dac", "count", 1));
+		testPlan.run();
+	}
+
+	@Test
+	public void shouldSupportUnconnectedDataflows() {
+		final SopremoTestPlan testPlan = new SopremoTestPlan(new TokenizeLine(), new TokenizeLine());
+
+		testPlan.getInput(0).
+			addObject("line", "abc");
+		testPlan.getInput(1).
+			addObject("line", "bcd");
+		testPlan.getExpectedOutput(0).
+			addObject("word", "abc");
+		testPlan.getExpectedOutput(1).
+			addObject("word", "bcd");
+		testPlan.run();
 	}
 
 	@Override

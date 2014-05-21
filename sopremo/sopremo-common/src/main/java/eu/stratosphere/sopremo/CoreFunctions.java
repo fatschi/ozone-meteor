@@ -431,11 +431,11 @@ public class CoreFunctions implements BuiltinProvider {
 				final IntNode to) {
 			final int length = input.length();
 			final int fromPos = resolveIndex(from.getIntValue(), length);
-			final int toPos = resolveIndex(to.getIntValue(), length);
+			final int toPos = Math.min(resolveIndex(to.getIntValue(), length), length);
 			this.result.setValue(input, fromPos, toPos);
 			return this.result;
 		}
-	}.withDefaultParameters(new IntNode(-1));
+	}.withDefaultParameters(new IntNode(Integer.MAX_VALUE));
 
 	@Name(verb = "trim")
 	public static final SopremoFunction TRIM = new SopremoFunction1<TextNode>() {

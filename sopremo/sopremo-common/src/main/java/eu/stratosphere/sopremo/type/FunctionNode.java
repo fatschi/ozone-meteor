@@ -12,16 +12,14 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.sopremo.function;
+package eu.stratosphere.sopremo.type;
 
 import java.io.IOException;
 
-import eu.stratosphere.sopremo.type.AbstractJsonNode;
-import eu.stratosphere.sopremo.type.IJsonNode;
+import eu.stratosphere.sopremo.function.SopremoFunction;
 
 /**
  */
-// @DefaultSerializer(FunctionNode.FunctionNodeSerializer.class)
 public class FunctionNode extends AbstractJsonNode {
 	private SopremoFunction function;
 

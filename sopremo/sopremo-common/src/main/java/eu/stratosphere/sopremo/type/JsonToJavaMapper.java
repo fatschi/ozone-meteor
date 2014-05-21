@@ -68,6 +68,7 @@ public class JsonToJavaMapper extends AbstractTypeMapper<TypeMapper<?, ?>> {
 		this.addDefaultTypeMapping(BooleanNode.class, Boolean.class);
 		this.addDefaultTypeMapping(IObjectNode.class, Map.class);
 		this.addDefaultTypeMapping(IArrayNode.class, List.class);
+		this.addDefaultTypeMapping(TypeNode.class, Class.class);
 
 		this.addMissingAndNullMappers();
 		this.addBooleanMappers();
@@ -78,6 +79,7 @@ public class JsonToJavaMapper extends AbstractTypeMapper<TypeMapper<?, ?>> {
 		this.addMapper(DecimalNode.class, BigDecimal.class, DefaultNumberMapper);
 		this.addMapper(BigIntegerNode.class, BigInteger.class, DefaultNumberMapper);
 		this.addGeneralMappers();
+		this.addTypeMappers();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -204,6 +206,22 @@ public class JsonToJavaMapper extends AbstractTypeMapper<TypeMapper<?, ?>> {
 				} catch (final IOException e) {
 				}
 				return target;
+			}
+		});
+	}
+
+	/**
+	 * 
+	 */
+	private void addTypeMappers() {
+		this.addMapper(TypeNode.class, Class.class, new TypeMapper<TypeNode, Class<? extends IJsonNode>>(null) {
+			/*
+			 * (non-Javadoc)
+			 * @see eu.stratosphere.sopremo.type.TypeMapper.Mapper#map(java.lang.Object, java.lang.Object)
+			 */
+			@Override
+			public Class<? extends IJsonNode> mapTo(final TypeNode from, final Class<? extends IJsonNode> target) {
+				return from.getNodeType();
 			}
 		});
 	}
@@ -450,7 +468,7 @@ public class JsonToJavaMapper extends AbstractTypeMapper<TypeMapper<?, ?>> {
 		@SuppressWarnings("unchecked")
 		@Override
 		public Map mapTo(final IObjectNode from, final Map target) {
-			final Set reusedKeys = this.reusedKeys.get();
+			final Set<Object> reusedKeys = this.reusedKeys.get();
 			if (this.rawKeyType == String.class) {
 				reusedKeys.addAll(from.getFieldNames());
 				for (final String key : from.getFieldNames())

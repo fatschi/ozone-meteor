@@ -76,15 +76,5 @@ public class AggregationTest extends MeteorTest {
 		final SopremoPlan expectedPlan = new SopremoPlan();
 		expectedPlan.setSinks(sink);
 		SopremoTestUtil.assertPlanEquals(expectedPlan, actualPlan);
-
-		// final Iterable<? extends Operator<?>> containedOperators = actualPlan.getContainedOperators();
-		// final ArrayList<Operator> ops = new ArrayList<Operator>();
-		// for (Operator<?> operator : containedOperators)
-		// ops.add(operator);
-		// final Grouping grouping = (Grouping) ops.get(1);
-		// System.out.println(grouping.getResultProjection().printAsTree());
-		// System.out.println();
-		// System.out.println(ExpressionUtil.replaceAggregationWithBatchAggregation(
-		// grouping.getResultProjection()).printAsTree());
 	}
 }

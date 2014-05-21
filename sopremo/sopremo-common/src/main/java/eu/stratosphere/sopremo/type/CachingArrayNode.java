@@ -122,7 +122,7 @@ public class CachingArrayNode<T extends IJsonNode> extends ArrayNode<T> {
 			final int len = input.readInt();
 
 			final int currentLen = oldInstance.size();
-			for (int i = 0; i < currentLen; i++)
+			for (int i = 0, size = Math.min(currentLen, len); i < size; i++)
 				oldInstance.set(i, SopremoUtil.deserializeInto(kryo, input, oldInstance.get(i)));
 			CachingArrayNode<IJsonNode> cachingArrayNode = (CachingArrayNode<IJsonNode>) oldInstance;
 			for (int i = currentLen; i < len; i++)
@@ -133,7 +133,6 @@ public class CachingArrayNode<T extends IJsonNode> extends ArrayNode<T> {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public void setSize(int size, T defaultNode) {
 		CachingList<T> cachingList = (CachingList<T>) this.getChildren();
 		int oldSize = cachingList.size();

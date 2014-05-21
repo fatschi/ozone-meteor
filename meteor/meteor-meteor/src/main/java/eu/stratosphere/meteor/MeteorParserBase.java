@@ -19,6 +19,7 @@ import org.antlr.runtime.RecognizerSharedState;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
 
+import eu.stratosphere.sopremo.expressions.ConstantExpression;
 import eu.stratosphere.sopremo.expressions.EvaluationExpression;
 import eu.stratosphere.sopremo.expressions.JsonStreamExpression;
 import eu.stratosphere.sopremo.expressions.ObjectAccess;
@@ -118,13 +119,26 @@ public abstract class MeteorParserBase extends QueryWithVariablesParser<JsonStre
 	protected void removeConstantScope() {
 		this.constantRegistry.pop();
 	}
+	
+	/* (non-Javadoc)
+	 * @see eu.stratosphere.sopremo.query.AbstractQueryParser#addTypeAlias(java.lang.String, java.lang.Class)
+	 */
+	@Override
+	public void addTypeAlias(String alias, Class<? extends IJsonNode> type) {
+		super.addTypeAlias(alias, type);
+		this.addConstant(alias, new ConstantExpression(new TypeNode(type)));
+	}
 
 	private void init() {
 		this.getPackageManager().importPackage("base");
 
 		this.addTypeAlias("int", IntNode.class);
+		this.addTypeAlias("long", IntNode.class);
+		this.addTypeAlias("bigint", BigIntegerNode.class);
 		this.addTypeAlias("decimal", DecimalNode.class);
+		this.addTypeAlias("numeric", DecimalNode.class);
 		this.addTypeAlias("string", TextNode.class);
+		this.addTypeAlias("text", TextNode.class);
 		this.addTypeAlias("double", DoubleNode.class);
 		this.addTypeAlias("boolean", BooleanNode.class);
 		this.addTypeAlias("bool", BooleanNode.class);

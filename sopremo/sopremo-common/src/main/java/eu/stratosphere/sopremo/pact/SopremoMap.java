@@ -1,6 +1,5 @@
 package eu.stratosphere.sopremo.pact;
 
-import eu.stratosphere.api.java.record.functions.MapFunction;
 import eu.stratosphere.sopremo.type.IJsonNode;
 
 /**

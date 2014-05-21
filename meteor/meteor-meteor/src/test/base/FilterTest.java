@@ -50,8 +50,6 @@ public class FilterTest extends MeteorTest {
 		final Sink output = new Sink("file://output.json").withInputs(selection);
 		expectedPlan.setSinks(output);
 
-		// System.out.println(Sop);
-
 		assertPlanEquals(expectedPlan, actualPlan);
 	}
 

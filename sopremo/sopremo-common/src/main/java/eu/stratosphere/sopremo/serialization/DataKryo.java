@@ -80,9 +80,9 @@ class DataKryo extends Kryo {
 		Registration registration = this.classResolver.getRegistration(type);
 		if (registration == null) {
 			if (IArrayNode.class.isAssignableFrom(type))
-				return registerAlias(type, IArrayNode.class);
+				return this.registerAlias(type, IArrayNode.class);
 			if (IObjectNode.class.isAssignableFrom(type))
-				return registerAlias(type, IObjectNode.class);
+				return this.registerAlias(type, IObjectNode.class);
 			throw new IllegalArgumentException("Class is not registered: " + className(type)
 				+ "\nNote: A class is automatically detected by Sopremo's package loader if it isn't tagged @Internal");
 		}

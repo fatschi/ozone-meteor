@@ -17,7 +17,6 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.serializers.FieldSerializer;
 
-import eu.stratosphere.pact.common.plan.PactModule;
 import eu.stratosphere.sopremo.AbstractSopremoType;
 import eu.stratosphere.sopremo.ISopremoType;
 import eu.stratosphere.sopremo.expressions.EvaluationExpression;
@@ -574,7 +573,6 @@ public abstract class Operator<Self extends Operator<Self>> extends Configurable
 		public Output read(final Kryo kryo, final Input input, final Class<Output> type) {
 			final Operator<?> operator = (Operator<?>) kryo.readClassAndObject(input);
 			final int index = input.readInt(true);
-			System.out.println(operator + " " + index);
 			return (Output) operator.getOutput(index);
 		}
 
@@ -586,7 +584,6 @@ public abstract class Operator<Self extends Operator<Self>> extends Configurable
 		@Override
 		public void write(final Kryo kryo, final com.esotericsoftware.kryo.io.Output output, final Output object) {
 			kryo.writeClassAndObject(output, object.getOperator());
-			System.out.println(object.getOperator() + " " + object.getIndex());
 			output.writeInt(object.getIndex(), true);
 		}
 

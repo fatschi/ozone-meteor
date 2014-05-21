@@ -42,7 +42,6 @@ public class TwoSourceJoinTest extends SopremoOperatorTestBase<TwoSourceJoin> {
 		sopremoPlan.getExpectedOutput(0).
 			addObject("v3", JsonUtil.createObjectNode("id", null, "worksFor", "CompanyABC"));
 
-		sopremoPlan.trace();
 		sopremoPlan.run();
 	}
 
@@ -220,7 +219,6 @@ public class TwoSourceJoinTest extends SopremoOperatorTestBase<TwoSourceJoin> {
 			addObject("worksFor", "CompanyABC").
 			addObject("biography", "A000059", "id", "usCongress3", "income", 1, "name", "John Doe", "worksFor", "CompanyUVW");
 
-		sopremoPlan.trace();
 		sopremoPlan.run();
 	}
 

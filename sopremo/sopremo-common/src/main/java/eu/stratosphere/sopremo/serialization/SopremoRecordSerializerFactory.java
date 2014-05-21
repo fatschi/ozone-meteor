@@ -27,7 +27,7 @@ import eu.stratosphere.sopremo.pact.SopremoUtil;
 public class SopremoRecordSerializerFactory implements TypeSerializerFactory<SopremoRecord> {
 
 	private SopremoRecordLayout layout;
-	
+
 	private ITypeRegistry typeRegistry;
 
 	private final static String LAYOUT_KEY = "sopremo.layout";
@@ -68,6 +68,24 @@ public class SopremoRecordSerializerFactory implements TypeSerializerFactory<Sop
 	@Override
 	public Class<SopremoRecord> getDataType() {
 		return SopremoRecord.class;
+	}
+
+	/**
+	 * Returns the layout.
+	 * 
+	 * @return the layout
+	 */
+	public SopremoRecordLayout getLayout() {
+		return this.layout;
+	}
+
+	/**
+	 * Returns the typeRegistry.
+	 * 
+	 * @return the typeRegistry
+	 */
+	public ITypeRegistry getTypeRegistry() {
+		return this.typeRegistry;
 	}
 
 	/*

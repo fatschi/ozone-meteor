@@ -12,23 +12,25 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.sopremo.type;
+package eu.stratosphere.sopremo;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
+import java.io.File;
+import java.io.IOException;
 
-/**
- * @author arvid
- *
- * @param <T>
- */
-public interface ReusingSerializer<T> {
+public class TestBase {
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.esotericsoftware.kryo.Serializer#read(com.esotericsoftware.kryo.Kryo,
-	 * com.esotericsoftware.kryo.io.Input, java.lang.Class)
-	 */
-	public abstract T read(Kryo kryo, Input input, T oldInstance, Class<T> type);
+	public static AssertionError newAssertionError(String message, Throwable cause) {
+		final AssertionError assertionError = new AssertionError(message);
+		assertionError.initCause(cause);
+		return assertionError;
+	}
+
+	public File getResource(final String name) {
+		try {
+			return new File(getClass().getClassLoader().getResources(name).nextElement().getFile());
+		} catch (IOException e) {
+			throw newAssertionError("Could not locate resource " + name, e);
+		}
+	}
 
 }

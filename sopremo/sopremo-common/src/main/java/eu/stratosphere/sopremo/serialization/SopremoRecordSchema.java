@@ -32,7 +32,8 @@ public class SopremoRecordSchema extends AbstractSchema<Class<? extends IJsonNod
 	private final IntSet usedKeys = new IntAVLTreeSet();
 
 	public void add(final int pos) {
-		this.usedKeys.add(pos);
+		if (pos != SopremoRecordLayout.VALUE_INDEX)
+			this.usedKeys.add(pos);
 	}
 
 	/*
@@ -41,7 +42,8 @@ public class SopremoRecordSchema extends AbstractSchema<Class<? extends IJsonNod
 	 */
 	@Override
 	public void addType(final int pos, final Class<? extends IJsonNode> type) throws ConflictingFieldTypeInfoException {
-		this.usedKeys.add(pos);
+		if (pos != SopremoRecordLayout.VALUE_INDEX)
+			this.usedKeys.add(pos);
 	}
 
 	/*
@@ -51,6 +53,34 @@ public class SopremoRecordSchema extends AbstractSchema<Class<? extends IJsonNod
 	@Override
 	public Class<? extends IJsonNode> getType(final int field) {
 		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + this.usedKeys.hashCode();
+		return result;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (this.getClass() != obj.getClass())
+			return false;
+		SopremoRecordSchema other = (SopremoRecordSchema) obj;
+		return this.usedKeys.equals(other.usedKeys);
 	}
 
 	/**

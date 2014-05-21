@@ -257,10 +257,14 @@ valueExpression
 	| parenthesesExpression 
 	| literal 
 	| VAR -> { getInputSelection($VAR) }
-  | ({$ternaryExpression::explicitPackageReferencePossible}?=> (ID ':')=> packageName=ID ':')? constant=ID { getScope($packageName.text).getConstantRegistry().get($constant.text) != null }? => 
-    -> { getScope($packageName.text).getConstantRegistry().get($constant.text) }  
+  | constantExpression  
 	| arrayCreation 
 	| objectCreation;
+
+constantExpression
+	: ({$ternaryExpression::explicitPackageReferencePossible}?=> (ID ':')=> packageName=ID ':')? constant=ID { getScope($packageName.text).getConstantRegistry().get($constant.text) != null }? => 
+    -> { getScope($packageName.text).getConstantRegistry().get($constant.text) };
+  catch [FailedPredicateException fe] { explainUsage("Unknown value " + $constant.text, fe); }
 	
 operatorExpression
 	:	op=operator -> ^(EXPRESSION["NestedOperatorExpression"] { $op.op });

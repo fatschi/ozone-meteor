@@ -9,10 +9,12 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import eu.stratosphere.core.testing.TestPlan;
+import eu.stratosphere.sopremo.type.CoercionException;
 import eu.stratosphere.sopremo.type.IJsonNode;
+import eu.stratosphere.sopremo.type.IntNode;
 import eu.stratosphere.sopremo.type.JsonUtil;
 import eu.stratosphere.sopremo.type.ObjectNode;
+import eu.stratosphere.sopremo.type.TextNode;
 
 public class CsvInputFormatTest extends InputFormatTest {
 
@@ -37,6 +39,60 @@ public class CsvInputFormatTest extends InputFormatTest {
 				"addr", "435 s. la cienega blv.", "city", "los,angeles",
 				"phone", "310/246-1501", "type", "american", "class", "'0'"),
 			JsonUtil.createObjectNode("id", "3", "name", "arnie morton's of chicago",
+				"addr", "435 s. la cienega blv.", "city", "los\nangeles", "phone", "310/246-1501",
+				"type", "american", "class", "'0'"));
+		Assert.assertEquals(expected, actual);
+	}
+
+	/**
+	 * Tests if a {@link TestPlan} can be executed.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void shouldParseTypes() throws IOException {
+		final File source = new File(this.getResource("CsvInputFormat/restaurant_short.csv"));
+
+		final CsvFormat format = new CsvFormat();
+		format.setFieldDelimiter(",");
+		format.setTypes(IntNode.class, TextNode.class);
+		final Collection<IJsonNode> actual = readFromFile(source, format);
+
+		final List<ObjectNode> expected = Arrays.asList(
+			JsonUtil.createObjectNode("id", 1, "name", "arnie morton's of chicago",
+				"addr", "435 s. la cienega blv.", "city", "los angeles",
+				"phone", "310/246-1501", "type", "american", "class", "'0'"),
+			JsonUtil.createObjectNode("id", 2, "name", "\"arnie morton's of chicago\"",
+				"addr", "435 s. la cienega blv.", "city", "los,angeles",
+				"phone", "310/246-1501", "type", "american", "class", "'0'"),
+			JsonUtil.createObjectNode("id", 3, "name", "arnie morton's of chicago",
+				"addr", "435 s. la cienega blv.", "city", "los\nangeles", "phone", "310/246-1501",
+				"type", "american", "class", "'0'"));
+		Assert.assertEquals(expected, actual);
+	}
+
+	/**
+	 * Tests if a {@link TestPlan} can be executed.
+	 * 
+	 * @throws IOException
+	 */
+	@Test(expected = CoercionException.class)
+	public void shouldFailIfIncorrectTypes() throws IOException {
+		final File source = new File(this.getResource("CsvInputFormat/restaurant_short.csv"));
+
+		final CsvFormat format = new CsvFormat();
+		format.setFieldDelimiter(",");
+		format.setTypes(IntNode.class, IntNode.class);
+		final Collection<IJsonNode> actual = readFromFile(source, format);
+
+		final List<ObjectNode> expected = Arrays.asList(
+			JsonUtil.createObjectNode("id", 1, "name", "arnie morton's of chicago",
+				"addr", "435 s. la cienega blv.", "city", "los angeles",
+				"phone", "310/246-1501", "type", "american", "class", "'0'"),
+			JsonUtil.createObjectNode("id", 2, "name", "\"arnie morton's of chicago\"",
+				"addr", "435 s. la cienega blv.", "city", "los,angeles",
+				"phone", "310/246-1501", "type", "american", "class", "'0'"),
+			JsonUtil.createObjectNode("id", 3, "name", "arnie morton's of chicago",
 				"addr", "435 s. la cienega blv.", "city", "los\nangeles", "phone", "310/246-1501",
 				"type", "american", "class", "'0'"));
 		Assert.assertEquals(expected, actual);

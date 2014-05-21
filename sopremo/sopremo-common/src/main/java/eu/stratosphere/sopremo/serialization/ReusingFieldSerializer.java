@@ -12,32 +12,30 @@
  * specific language governing permissions and limitations under the License.
  *
  **********************************************************************************************************************/
-package eu.stratosphere.sopremo;
+package eu.stratosphere.sopremo.serialization;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.serializers.FieldSerializer;
 
-import eu.stratosphere.sopremo.type.AbstractReusingSerializer;
+import eu.stratosphere.sopremo.type.ReusingSerializer;
 
 /**
+ * @author arvid
  */
-@SuppressWarnings("rawtypes")
-public abstract class SingletonSerializer extends AbstractReusingSerializer {
-	private final Object singleton;
+public final class ReusingFieldSerializer<T> extends FieldSerializer<T> implements ReusingSerializer<T> {
 
 	/**
-	 * Initializes SingletonSerializer.
+	 * Initializes ReusingFieldSerializer.
+	 * 
+	 * @param kryo
+	 * @param type
 	 */
-	public SingletonSerializer(final Object singleton) {
-		this.singleton = singleton;
-		this.setImmutable(true);
+	public ReusingFieldSerializer(Kryo kryo, Class<? extends T> type) {
+		super(kryo, type);
 	}
 
-	@Override
-	public Object read(final Kryo kryo, final Input input, final Class type) {
-		return this.singleton;
-	}
+	private transient T oldInstance;
 
 	/*
 	 * (non-Javadoc)
@@ -45,11 +43,20 @@ public abstract class SingletonSerializer extends AbstractReusingSerializer {
 	 * com.esotericsoftware.kryo.io.Input, java.lang.Object, java.lang.Class)
 	 */
 	@Override
-	public Object read(final Kryo kryo, final Input input, final Object oldInstance, final Class type) {
-		return this.singleton;
+	public T read(Kryo kryo, Input input, T oldInstance, Class<T> type) {
+		this.oldInstance = oldInstance;
+		return super.read(kryo, input, type);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see com.esotericsoftware.kryo.serializers.FieldSerializer#create(com.esotericsoftware.kryo.Kryo,
+	 * com.esotericsoftware.kryo.io.Input, java.lang.Class)
+	 */
 	@Override
-	public void write(final Kryo kryo, final Output output, final Object object) {
+	protected T create(Kryo kryo, Input input, Class<T> type) {
+		if (this.oldInstance != null)
+			return this.oldInstance;
+		return super.create(kryo, input, type);
 	}
 }

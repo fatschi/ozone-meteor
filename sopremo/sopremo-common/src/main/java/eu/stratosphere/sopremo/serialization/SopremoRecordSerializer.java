@@ -30,7 +30,7 @@ public class SopremoRecordSerializer extends TypeSerializer<SopremoRecord> {
 
 	private final ITypeRegistry typeRegistry;
 
-	private SopremoRecord serializationRecord;
+	private transient SopremoRecord readRecord;
 
 	/**
 	 * Creates a new instance of the SopremoRecordSerializers. Private to prevent instantiation.
@@ -115,9 +115,9 @@ public class SopremoRecordSerializer extends TypeSerializer<SopremoRecord> {
 	 */
 	@Override
 	public void serialize(final SopremoRecord record, final DataOutputView target) throws IOException {
-		if (this.serializationRecord != record) {
-			this.serializationRecord = record;
-			this.serializationRecord.init(this.layout, this.typeRegistry);
+		if (this.readRecord != record) {
+			this.readRecord = record;
+			this.readRecord.init(this.layout, this.typeRegistry);
 		}
 		record.write(target);
 	}
