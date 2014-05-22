@@ -95,6 +95,8 @@ public abstract class ElementaryOperator<Self extends ElementaryOperator<Self>>
 	}
 
 	private boolean combinable = false, combinableFirst = false, combinableSecond = false;
+	
+	private boolean removeTrivialInputSelections = false;
 
 	/**
 	 * Initializes the ElementaryOperator with the number of outputs set to 1.
@@ -103,6 +105,7 @@ public abstract class ElementaryOperator<Self extends ElementaryOperator<Self>>
 	 */
 	public ElementaryOperator() {
 		super();
+		this.removeTrivialInputSelections = getMaxInputs() == 1;
 	}
 
 	/**
@@ -125,6 +128,7 @@ public abstract class ElementaryOperator<Self extends ElementaryOperator<Self>>
 	 */
 	public ElementaryOperator(final int minInputs, final int maxInputs) {
 		super(minInputs, maxInputs, 1, 1);
+		this.removeTrivialInputSelections = maxInputs == 1;
 	}
 
 	/*
@@ -139,7 +143,7 @@ public abstract class ElementaryOperator<Self extends ElementaryOperator<Self>>
 			this.getResultProjection().appendAsString(appendable);
 		}
 	}
-
+	
 	@Override
 	public ElementarySopremoModule asElementaryOperators() {
 		final ElementarySopremoModule module =
@@ -153,7 +157,7 @@ public abstract class ElementaryOperator<Self extends ElementaryOperator<Self>>
 			module.getOutput(index).setInput(index, outputs.get(index));
 		return module;
 	}
-
+	
 	public PactModule asPactModule() {
 		SopremoRecordLayout layout = SopremoEnvironment.getInstance().getLayout();
 		final eu.stratosphere.api.common.operators.Operator contract = this.getOperator(layout);
@@ -385,7 +389,7 @@ public abstract class ElementaryOperator<Self extends ElementaryOperator<Self>>
 		if (resultProjection == null)
 			throw new NullPointerException("resultProjection must not be null");
 
-		if (this.getMaxInputs() == 1)
+		if (this.removeTrivialInputSelections)
 			this.resultProjection = resultProjection.clone().remove(new InputSelection(0));
 		else
 			this.resultProjection = resultProjection;
@@ -402,7 +406,7 @@ public abstract class ElementaryOperator<Self extends ElementaryOperator<Self>>
 		this.setCombinable(combinable);
 		return this.self();
 	}
-
+	
 	/**
 	 * Sets the combinableFirst to the specified value. This method has only effects for CoGroup stubs.
 	 * 
@@ -564,8 +568,6 @@ public abstract class ElementaryOperator<Self extends ElementaryOperator<Self>>
 		return keyIndices.toIntArray();
 	}
 
-	// protected abstract Schema getKeyFields();
-
 	/**
 	 * Creates the {@link Operator} that represents this operator.
 	 * 
@@ -615,5 +617,34 @@ public abstract class ElementaryOperator<Self extends ElementaryOperator<Self>>
 			throw new IllegalStateException("Cannot create contract from stub "
 				+ stubClass, e);
 		}
+	}
+
+	/**
+	 * Returns the removeTrivialInputSelections.
+	 * 
+	 * @return the removeTrivialInputSelections
+	 */
+	protected boolean isRemoveTrivialInputSelections() {
+		return this.removeTrivialInputSelections;
+	}
+
+	/* (non-Javadoc)
+	 * @see eu.stratosphere.sopremo.operator.Operator#setNumberOfInputs(int, int)
+	 */
+	@Override
+	protected void setNumberOfInputs(int min, int max) {
+		super.setNumberOfInputs(min, max);
+		this.removeTrivialInputSelections = max == 1;
+	}
+
+	// protected abstract Schema getKeyFields();
+
+	/**
+	 * Sets the removeTrivialInputSelections to the specified value.
+	 *
+	 * @param removeTrivialInputSelections the removeTrivialInputSelections to set
+	 */
+	protected void setRemoveTrivialInputSelections(boolean removeTrivialInputSelections) {
+		this.removeTrivialInputSelections = removeTrivialInputSelections;
 	}
 }

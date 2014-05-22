@@ -24,6 +24,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -44,6 +45,7 @@ import eu.stratosphere.sopremo.execution.ExecutionResponse.ExecutionState;
 import eu.stratosphere.sopremo.execution.SopremoConstants;
 import eu.stratosphere.sopremo.execution.SopremoExecutionProtocol;
 import eu.stratosphere.sopremo.execution.SopremoID;
+import eu.stratosphere.sopremo.expressions.EvaluationExpression;
 import eu.stratosphere.sopremo.io.JsonGenerator;
 import eu.stratosphere.sopremo.io.JsonParser;
 import eu.stratosphere.sopremo.type.IJsonNode;
@@ -98,9 +100,8 @@ public class SopremoTestServer implements Closeable, SopremoExecutionProtocol {
 			this.tempDir += File.separator;
 	}
 
-	public void checkContentsOf(final String fileName, final IJsonNode... expected) throws IOException {
-		final List<IJsonNode> remainingValues = new ArrayList<IJsonNode>(Arrays.asList(expected));
-
+	public List<IJsonNode> getContentsOf(final String fileName) throws IOException {
+		final List<IJsonNode> actualValues = new ArrayList<IJsonNode>();
 		final String outputFile = this.tempDir + fileName;
 		this.filesToCleanup.add(outputFile);
 		final File file = new File(outputFile);
@@ -108,44 +109,47 @@ public class SopremoTestServer implements Closeable, SopremoExecutionProtocol {
 		final JsonParser parser = new JsonParser(new FileReader(file));
 		try {
 			parser.setWrappingArraySkipping(true);
-			int index = 0;
-
-			for (; index < expected.length && !parser.checkEnd(); index++) {
-				final IJsonNode actual = parser.readValueAsTree();
-				Assert.assertTrue(String.format("Unexpected value %s; remaining %s", actual, remainingValues),
-					remainingValues.remove(actual));
-			}
-			if (!remainingValues.isEmpty())
-				Assert.fail("More elements expected " + remainingValues);
-			if (!parser.checkEnd())
-				Assert.fail("Less elements expected " + parser.readValueAsTree());
+			while (!parser.checkEnd())
+				actualValues.add(parser.readValueAsTree());
 		} finally {
 			parser.close();
 		}
+		return actualValues;
 	}
-	
-	public void checkOrderedContentsOf(final String fileName, final IJsonNode... expected) throws IOException {
-		final String outputFile = this.tempDir + fileName;
-		this.filesToCleanup.add(outputFile);
-		final File file = new File(outputFile);
-		Assert.assertTrue("output " + fileName + " not written", file.exists());
-		final JsonParser parser = new JsonParser(new FileReader(file));
-		try {
-			parser.setWrappingArraySkipping(true);
-			int index = 0;
 
-			for (; index < expected.length && !parser.checkEnd(); index++) {
-				final IJsonNode actual = parser.readValueAsTree();
-				Assert.assertTrue(String.format("Unexpected value %s; expected %s", actual, expected[index]),
-					expected[index].equals(actual));
-			}
-			if (index < expected.length)
-				Assert.fail("More elements expected " + Arrays.asList(expected).subList(index, expected.length));
-			if (!parser.checkEnd())
-				Assert.fail("Less elements expected " + parser.readValueAsTree());
-		} finally {
-			parser.close();
+	public void checkContentsOf(final String fileName, final IJsonNode... expected) throws IOException {
+		checkContentsOf(fileName, EvaluationExpression.VALUE, expected);
+	}
+
+	public void checkContentsOf(final String fileName, EvaluationExpression canonicalizer, final IJsonNode... expectedNodes) throws IOException {
+		final List<IJsonNode> expectedValues = canonicalize(Arrays.asList(expectedNodes), canonicalizer);
+		final List<IJsonNode> actualValues = canonicalize(getContentsOf(fileName), canonicalizer);
+
+		final Iterator<IJsonNode> expectedIter = expectedValues.iterator(), actualIter = actualValues.iterator();
+		while (expectedIter.hasNext()) {
+			IJsonNode expected = expectedIter.next();
+			while(actualIter.hasNext()) 
+				if(actualIter.next().equals(expected)) {
+					actualIter.remove();
+					expectedIter.remove();
+					break;
+				}
 		}
+		
+		if (!expectedValues.isEmpty() || !actualValues.isEmpty())
+			Assert.fail(String.format("Unmatched elements. Expected: %s, but was: %s", expectedValues, actualValues));
+	}
+
+	private List<IJsonNode> canonicalize(List<IJsonNode> values, EvaluationExpression canonicalizer) {
+		ArrayList<IJsonNode> canonicalizedValues = new ArrayList<IJsonNode>();
+		for (IJsonNode value : values)
+			canonicalizedValues.add(canonicalizer.evaluate(value));
+		return canonicalizedValues;
+	}
+
+	public void checkOrderedContentsOf(final String fileName, final IJsonNode... expected) throws IOException {
+		List<IJsonNode> actual = getContentsOf(fileName);
+		Assert.assertArrayEquals(expected, actual.toArray());
 	}
 
 	/*
