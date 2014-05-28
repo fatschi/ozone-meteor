@@ -1,8 +1,5 @@
 package eu.stratosphere.sopremo.packages;
 
-import eu.stratosphere.sopremo.aggregation.AggregationFunction;
-import eu.stratosphere.sopremo.function.SopremoFunction;
-import eu.stratosphere.sopremo.type.IJsonNode;
 
 /**
  * Tag interface to indicate that the given class provides built-in functions and constants.<br>

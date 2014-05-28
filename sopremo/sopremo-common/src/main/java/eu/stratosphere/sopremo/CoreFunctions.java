@@ -214,7 +214,7 @@ public class CoreFunctions implements BuiltinProvider {
 
 		@Override
 		protected IJsonNode call(final TextNode input) {
-			builder = new StringBuilder();
+			this.builder.setLength(0);
 			this.builder.append(input);
 
 			boolean capitalize = true;

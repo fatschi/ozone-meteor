@@ -22,7 +22,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.List;
 
 import com.esotericsoftware.kryo.DefaultSerializer;

@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import eu.stratosphere.api.common.Program;
 import eu.stratosphere.api.common.io.FileInputFormat;
 import eu.stratosphere.api.common.io.FileOutputFormat;
 import eu.stratosphere.api.common.operators.FileDataSink;

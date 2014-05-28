@@ -18,8 +18,6 @@ import java.io.IOException;
 
 import javolution.text.TypeFormat;
 import eu.stratosphere.sopremo.EvaluationException;
-import eu.stratosphere.sopremo.operator.JsonStream;
-import eu.stratosphere.sopremo.operator.Operator;
 import eu.stratosphere.sopremo.type.IArrayNode;
 import eu.stratosphere.sopremo.type.IJsonNode;
 

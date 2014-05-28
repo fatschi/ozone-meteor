@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.codehaus.jackson.JsonNode;
-
 import com.esotericsoftware.kryo.DefaultSerializer;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -31,11 +29,7 @@ import eu.stratosphere.sopremo.ISopremoType;
 import eu.stratosphere.sopremo.SingletonSerializer;
 import eu.stratosphere.sopremo.expressions.tree.ChildIterator;
 import eu.stratosphere.sopremo.expressions.tree.ListChildIterator;
-import eu.stratosphere.sopremo.operator.JsonStream;
-import eu.stratosphere.sopremo.operator.Operator;
-import eu.stratosphere.sopremo.type.IArrayNode;
 import eu.stratosphere.sopremo.type.IJsonNode;
-import eu.stratosphere.sopremo.type.IStreamNode;
 import eu.stratosphere.util.Immutable;
 
 /**

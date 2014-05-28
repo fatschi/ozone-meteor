@@ -16,7 +16,6 @@ package eu.stratosphere.sopremo;
 
 import eu.stratosphere.api.common.functions.RuntimeContext;
 import eu.stratosphere.configuration.Configuration;
-import eu.stratosphere.sopremo.operator.Operator;
 import eu.stratosphere.sopremo.pact.SopremoUtil;
 import eu.stratosphere.sopremo.serialization.SopremoRecordLayout;
 

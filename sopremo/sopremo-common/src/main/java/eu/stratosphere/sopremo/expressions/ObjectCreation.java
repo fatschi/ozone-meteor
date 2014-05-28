@@ -162,7 +162,7 @@ public class ObjectCreation extends EvaluationExpression {
 	 * @return the mapping at the specified index
 	 */
 	public Mapping<?> getMapping(final String fieldName) {
-		for (Mapping<?> mapping : mappings)
+		for (Mapping<?> mapping : this.mappings)
 			if (mapping.getTarget().equals(fieldName))
 				return mapping;
 		return null;

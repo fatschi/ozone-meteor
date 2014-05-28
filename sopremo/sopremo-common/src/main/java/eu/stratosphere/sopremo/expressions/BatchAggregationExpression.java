@@ -25,9 +25,7 @@ import java.util.Map;
 import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 
-import eu.stratosphere.sopremo.EvaluationException;
 import eu.stratosphere.sopremo.aggregation.Aggregation;
-import eu.stratosphere.sopremo.aggregation.AggregationFunction;
 import eu.stratosphere.sopremo.expressions.tree.ChildIterator;
 import eu.stratosphere.sopremo.expressions.tree.ConcatenatingChildIterator;
 import eu.stratosphere.sopremo.function.ExpressionFunction;
@@ -35,7 +33,6 @@ import eu.stratosphere.sopremo.type.ArrayNode;
 import eu.stratosphere.sopremo.type.IArrayNode;
 import eu.stratosphere.sopremo.type.IJsonNode;
 import eu.stratosphere.sopremo.type.IStreamNode;
-import eu.stratosphere.sopremo.type.MissingNode;
 
 /**
  * Batch aggregates one stream of {@link IJsonNode} with several {@link AggregationFunction}s.

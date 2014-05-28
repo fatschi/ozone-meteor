@@ -48,7 +48,7 @@ public class JsonParserTest {
 	public void shouldParseArrays() throws IOException {
 		final JsonParser parser = new JsonParser(this.value);
 		IJsonNode result = null;
-		if(this.steps > 1)
+		if (this.steps > 1)
 			parser.setWrappingArraySkipping(true);
 		for (int i = 0; i < this.steps; i++)
 			result = parser.readValueAsTree();
@@ -100,7 +100,6 @@ public class JsonParserTest {
 					.put(
 						"key2", new ObjectNode().put("key3", IntNode.valueOf(23))), 1 },
 			{ "[1 ,2 ,3, 4 , null]", NullNode.getInstance(), 5 }
-
 		});
 	}
 }

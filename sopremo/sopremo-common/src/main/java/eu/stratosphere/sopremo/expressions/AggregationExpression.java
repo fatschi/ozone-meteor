@@ -17,7 +17,6 @@ package eu.stratosphere.sopremo.expressions;
 import java.io.IOException;
 
 import eu.stratosphere.sopremo.aggregation.Aggregation;
-import eu.stratosphere.sopremo.aggregation.AggregationFunction;
 import eu.stratosphere.sopremo.type.IJsonNode;
 import eu.stratosphere.sopremo.type.IStreamNode;
 

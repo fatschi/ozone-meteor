@@ -24,7 +24,6 @@ import java.util.List;
 import javolution.text.TextFormat;
 import eu.stratosphere.sopremo.expressions.ArrayAccess;
 import eu.stratosphere.sopremo.expressions.EvaluationExpression;
-import eu.stratosphere.sopremo.operator.SopremoPlan;
 
 /**
  * The schema of a {@link SopremoPlan} is the distinct set of its decomposed key expressions.

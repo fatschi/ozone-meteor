@@ -21,6 +21,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import eu.stratosphere.util.IdentitySet;
 
 /**
@@ -54,6 +57,8 @@ public abstract class GraphModule<Node, InputNode extends Node, OutputNode exten
 	private final ConnectionNavigator<Node> navigator;
 
 	private String name;
+
+	private static final Log LOG = LogFactory.getLog(GraphModule.class);
 
 	/**
 	 * Initializes GraphModule.
@@ -249,8 +254,7 @@ public abstract class GraphModule<Node, InputNode extends Node, OutputNode exten
 			inputList.remove(node);
 
 		if (!inputList.isEmpty())
-			throw new IllegalStateException(String.format("%s: inputs %s are not fully connected", this.getName(),
-				inputList));
+			LOG.warn(String.format("%s: inputs %s are not fully connected", this.getName(), inputList));
 	}
 
 	private List<Node> getUnmatchingNode(final Iterable<? extends Node> nodes1, final Iterable<? extends Node> nodes2,

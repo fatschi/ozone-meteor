@@ -45,6 +45,7 @@ import eu.stratosphere.sopremo.expressions.EvaluationExpression;
 import eu.stratosphere.sopremo.packages.DefaultTypeRegistry;
 import eu.stratosphere.sopremo.packages.ITypeRegistry;
 import eu.stratosphere.sopremo.pact.SopremoUtil;
+import eu.stratosphere.sopremo.type.AbstractReusingSerializer;
 import eu.stratosphere.sopremo.type.ArrayNode;
 import eu.stratosphere.sopremo.type.BooleanNode;
 import eu.stratosphere.sopremo.type.CachingArrayNode;
@@ -54,7 +55,6 @@ import eu.stratosphere.sopremo.type.IObjectNode;
 import eu.stratosphere.sopremo.type.MissingNode;
 import eu.stratosphere.sopremo.type.NullNode;
 import eu.stratosphere.sopremo.type.ObjectNode;
-import eu.stratosphere.sopremo.type.AbstractReusingSerializer;
 import eu.stratosphere.sopremo.type.ReusingSerializer;
 import eu.stratosphere.sopremo.type.TextNode;
 import eu.stratosphere.sopremo.type.TypeCoercer;
@@ -126,8 +126,8 @@ public class SopremoRecord extends AbstractSopremoType implements ISopremoType {
 		this.kryo.registerAlias(ArrayNode.class, CachingArrayNode.class);
 		this.kryo.registerAlias(BooleanNode.UnmodifiableBoolean.class, BooleanNode.class);
 
-		for (final Class<? extends IJsonNode> type : TypeCoercer.NUMERIC_TYPES)
-			this.kryo.register(type, new ReusingFieldSerializer<IJsonNode>(this.kryo, type));
+		for (final Class<?> type : TypeCoercer.NUMERIC_TYPES)
+			this.kryo.register(type, new ReusingFieldSerializer<Object>(this.kryo, type));
 
 		final List<Class<? extends IJsonNode>> types = registry.getTypes();
 		for (final Class<? extends IJsonNode> type : types) {

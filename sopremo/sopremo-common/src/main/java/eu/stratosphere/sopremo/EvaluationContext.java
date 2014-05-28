@@ -169,7 +169,7 @@ public class EvaluationContext extends AbstractSopremoType {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <Type> Type getParameter(final String key, final Class<Type> type) {
+	public <Type> Type getParameter(final String key, @SuppressWarnings("unused") final Class<Type> type) {
 		final Object value = this.contextParameters.get(key);
 		return (Type) value;
 	}

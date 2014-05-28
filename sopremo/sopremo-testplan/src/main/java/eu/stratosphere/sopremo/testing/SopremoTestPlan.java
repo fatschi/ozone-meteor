@@ -964,9 +964,9 @@ public class SopremoTestPlan {
 					 */
 					@Override
 					protected IJsonNode loadNext() {
-						if (parser.checkEnd())
-							return this.noMoreElements();
 						try {
+							if (parser.checkEnd())
+								return this.noMoreElements();
 							return parser.readValueAsTree();
 						} catch (final IOException e) {
 							throw new IllegalStateException(String.format(

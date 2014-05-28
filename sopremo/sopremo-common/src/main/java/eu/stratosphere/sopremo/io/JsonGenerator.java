@@ -10,7 +10,6 @@ import java.io.Writer;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-import eu.stratosphere.sopremo.type.ArrayNode;
 import eu.stratosphere.sopremo.type.IArrayNode;
 import eu.stratosphere.sopremo.type.IJsonNode;
 import eu.stratosphere.sopremo.type.IObjectNode;

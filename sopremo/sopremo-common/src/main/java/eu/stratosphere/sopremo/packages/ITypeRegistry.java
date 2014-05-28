@@ -16,7 +16,6 @@ package eu.stratosphere.sopremo.packages;
 
 import java.util.List;
 
-import eu.stratosphere.sopremo.function.SopremoFunction;
 import eu.stratosphere.sopremo.type.IJsonNode;
 
 /**

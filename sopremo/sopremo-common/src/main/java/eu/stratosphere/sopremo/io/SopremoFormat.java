@@ -413,9 +413,9 @@ public abstract class SopremoFormat extends ConfigurableSopremoType {
 			this.end = true;
 		}
 
+		@SuppressWarnings("unused")
 		protected float getAverageRecordBytes(final FileSystem fileSystem, final ArrayList<FileStatus> files,
-				final long fileSize)
-				throws IOException {
+				final long fileSize) throws IOException {
 			return BaseStatistics.AVG_RECORD_BYTES_UNKNOWN;
 		}
 

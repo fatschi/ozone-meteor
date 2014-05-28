@@ -124,7 +124,7 @@ public class JsonFormat extends SopremoFormat {
 		 * , eu.stratosphere.core.fs.FileInputSplit)
 		 */
 		@Override
-		protected void open(final FSDataInputStream stream, final FileInputSplit split) {
+		protected void open(final FSDataInputStream stream, final FileInputSplit split) throws JsonParseException {
 			// we currently have no method to handle multiple splits
 			if (split.getStart() != 0) {
 				this.endReached();

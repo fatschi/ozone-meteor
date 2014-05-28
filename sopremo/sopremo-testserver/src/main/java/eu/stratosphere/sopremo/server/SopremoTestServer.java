@@ -125,15 +125,18 @@ public class SopremoTestServer implements Closeable, SopremoExecutionProtocol {
 		final List<IJsonNode> expectedValues = canonicalize(Arrays.asList(expectedNodes), canonicalizer);
 		final List<IJsonNode> actualValues = canonicalize(getContentsOf(fileName), canonicalizer);
 
-		final Iterator<IJsonNode> expectedIter = expectedValues.iterator(), actualIter = actualValues.iterator();
+		final Iterator<IJsonNode> expectedIter = expectedValues.iterator();
 		while (expectedIter.hasNext()) {
 			IJsonNode expected = expectedIter.next();
-			while(actualIter.hasNext()) 
-				if(actualIter.next().equals(expected)) {
+			final Iterator<IJsonNode> actualIter = actualValues.iterator();
+			while(actualIter.hasNext()) {
+				IJsonNode actual = actualIter.next();
+				if(actual.equals(expected)) {
 					actualIter.remove();
 					expectedIter.remove();
 					break;
 				}
+			}
 		}
 		
 		if (!expectedValues.isEmpty() || !actualValues.isEmpty())

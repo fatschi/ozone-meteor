@@ -21,8 +21,8 @@ public class TypeCoercer {
 	private final Map<Class<? extends IJsonNode>, Map<Class<? extends IJsonNode>, TypeMapper<?, ?>>> coercers =
 		new IdentityHashMap<Class<? extends IJsonNode>, Map<Class<? extends IJsonNode>, TypeMapper<?, ?>>>();
 
-	public static final List<Class<? extends INumericNode>> NUMERIC_TYPES = Arrays.asList(
-		(Class<? extends INumericNode>)
+	@SuppressWarnings("unchecked")
+	public static final List<Class<? extends INumericNode>> NUMERIC_TYPES = Arrays.<Class<? extends INumericNode>>asList(
 		IntNode.class, DoubleNode.class, LongNode.class, DecimalNode.class, BigIntegerNode.class);
 
 	private static final TypeMapper<IJsonNode, IJsonNode> NULL_COERCER = new TypeMapper<IJsonNode, IJsonNode>(null) {

@@ -193,7 +193,7 @@ public class SopremoRecordPostPass extends GenericFlatTypePostPass<Class<? exten
 					layouts.removeAll(SopremoRecordLayout.EMPTY);
 
 					ITypeRegistry registry = ((SopremoRecordSerializerFactory) outgoingChannels.get(0).getSerializer()).getTypeRegistry();
-					for (SopremoRecordLayout layout : layouts.keys()) {
+					for (SopremoRecordLayout layout : layouts.keySet()) {
 						Channel inMemoryChannel = new Channel(node);
 						inMemoryChannel.setShipStrategy(ShipStrategyType.FORWARD);
 						inMemoryChannel.setLocalStrategy(LocalStrategy.NONE);

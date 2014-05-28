@@ -17,7 +17,6 @@ import eu.stratosphere.sopremo.type.DecimalNode;
 import eu.stratosphere.sopremo.type.IJsonNode;
 import eu.stratosphere.sopremo.type.IntNode;
 import eu.stratosphere.sopremo.type.LongNode;
-import eu.stratosphere.sopremo.type.MissingNode;
 import eu.stratosphere.sopremo.type.NullNode;
 import eu.stratosphere.sopremo.type.ObjectNode;
 import eu.stratosphere.sopremo.type.TextNode;
@@ -42,21 +41,23 @@ public class JsonParserSuccessParamTest {
 	@Before
 	public void setUp() {
 		this.parser = new JsonParser(this.input);
-		if(this.expectedResults.length > 1)
+		if (this.expectedResults.length > 1)
 			this.parser.setWrappingArraySkipping(true);
 	}
 
 	@Test
 	public void shouldParseCorrectly() throws JsonParseException {
-		for (final IJsonNode expectedResult : this.expectedResults) {
+		int index = 0;
+		while (!this.parser.checkEnd() && index < this.expectedResults.length) {
 			final IJsonNode result = this.parser.readValueAsTree();
-			Assert.assertEquals(expectedResult, result);
+			Assert.assertEquals(this.expectedResults[index++], result);
 		}
+		Assert.assertEquals(this.expectedResults.length, index);
 	}
 
 	@Test
 	public void shouldParseCorrectNumberOfChars() throws JsonParseException {
-		for (int i = 0; i < this.expectedResults.length; i++)
+		while (!this.parser.checkEnd())
 			this.parser.readValueAsTree();
 
 		Assert.assertEquals(this.counter, this.parser.getNumberOfParsedChars());
@@ -88,10 +89,10 @@ public class JsonParserSuccessParamTest {
 			/* [15] */{ "\"thisIs\\\"AEscape\\\"Sequence\"", create(TextNode.valueOf("thisIs\"AEscape\"Sequence")),
 				27 },
 			/* [16] */{ "   {   \"42\" :  42 , \"1337\" :   []  }",
-				create(new ObjectNode().put("42", IntNode.valueOf(42)).put("1337", new ArrayNode<IJsonNode>())), 36 },
+				create(new ObjectNode().put("42", IntNode.valueOf(42)).put("1337", new ArrayNode<IJsonNode>())), 39 },
 			/* [17] */{ "{ \"object\" : { \"key\" : [] } }",
 				create(new ObjectNode().put("object", new ObjectNode().put("key", new ArrayNode<IJsonNode>()))), 29 },
-			/* [18] */{ "", create(MissingNode.getInstance()), 0 },
+			/* [18] */{ "", create(), 0 },
 			/* [19] */{ "-42", create(IntNode.valueOf(-42)), 3 },
 
 			/*
@@ -110,7 +111,8 @@ public class JsonParserSuccessParamTest {
 					NullNode.getInstance(),
 					IntNode.valueOf(42), TextNode.valueOf("TEST")), 38 },
 			/* [24] */{ "[null, null]",
-				create(NullNode.getInstance(), NullNode.getInstance()), 11 }
+				create(NullNode.getInstance(), NullNode.getInstance()), 11 },
+			/* [25] */{ "[]", create(), 2 }
 		});
 	}
 

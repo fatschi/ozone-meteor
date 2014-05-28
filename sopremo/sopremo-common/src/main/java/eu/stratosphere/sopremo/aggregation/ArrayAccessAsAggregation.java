@@ -17,13 +17,8 @@ package eu.stratosphere.sopremo.aggregation;
 import java.io.IOException;
 
 import javolution.text.TypeFormat;
-import eu.stratosphere.sopremo.expressions.ArrayAccess;
-import eu.stratosphere.sopremo.expressions.BatchAggregationExpression;
-import eu.stratosphere.sopremo.pact.SopremoCoGroup;
-import eu.stratosphere.sopremo.pact.SopremoReduce;
 import eu.stratosphere.sopremo.type.CachingArrayNode;
 import eu.stratosphere.sopremo.type.IJsonNode;
-import eu.stratosphere.sopremo.type.IStreamNode;
 
 /**
  * Replaces simple {@link ArrayAccess}es in {@link SopremoReduce} and {@link SopremoCoGroup}.<br/>

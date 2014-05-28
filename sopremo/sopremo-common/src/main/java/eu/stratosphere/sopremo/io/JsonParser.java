@@ -42,6 +42,8 @@ public class JsonParser {
 
 	private boolean skipWrappingArray;
 
+	private boolean skippedArray;
+
 	private static char ELEMENT_SEPARATOR = ',';
 
 	private static char ARRAY_START = '[', ARRAY_END = ']';
@@ -87,8 +89,29 @@ public class JsonParser {
 	 * 
 	 * @return either the whole input is already parsed or not
 	 */
-	public boolean checkEnd() {
+	public boolean checkEnd() throws JsonParseException {
+		if (this.currentCounter == 0 && !this.reachedEnd)
+			this.open();
 		return this.reachedEnd;
+	}
+
+	private void open() throws JsonParseException {
+		this.skippedArray = false;
+		this.markReader();
+		int currentChar = this.readIgnoreWhitespace();
+		if (currentChar == -1) {
+			this.reachedEnd = true;
+			return;
+		}
+		if (this.skipWrappingArray)
+			if (currentChar == ARRAY_START) {
+				this.markReader();
+				this.skippedArray = true;
+				currentChar = this.readIgnoreWhitespace();
+				if (currentChar == ARRAY_END)
+					this.reachedEnd = true;
+			}
+		this.resetReader();
 	}
 
 	/**
@@ -123,23 +146,15 @@ public class JsonParser {
 	 *         reason of failure consult {@link JsonParseException#getMessage()}.
 	 */
 	public IJsonNode readValueAsTree() throws JsonParseException {
-		final boolean start = this.currentCounter == 0;
+		if (this.currentCounter == 0 && !this.reachedEnd)
+			this.open();
 		int currentChar = this.readIgnoreWhitespace();
-		if (currentChar == -1 && start)
-			return MissingNode.getInstance();
-		boolean skippedArray = this.skipWrappingArray;
-		if (this.skipWrappingArray && start) {
-			if (currentChar == ARRAY_START)
-				currentChar = this.readIgnoreWhitespace();
-			else
-				skippedArray = false;
-		}
 		final IJsonNode result = this.parseElement(currentChar);
-		if (skippedArray) {
-			if (expect(this.readIgnoreWhitespace(), ELEMENT_SEPARATOR, ARRAY_END) == ARRAY_END)
+		if (this.skippedArray) {
+			if (this.expect(this.readIgnoreWhitespace(), ELEMENT_SEPARATOR, ARRAY_END) == ARRAY_END)
 				this.reachedEnd = true;
 		} else {
-			expect(this.readIgnoreWhitespace(), -1);
+			this.expect(this.readIgnoreWhitespace(), -1);
 			this.reachedEnd = true;
 		}
 		return result;
@@ -193,8 +208,7 @@ public class JsonParser {
 	}
 
 	private IJsonNode parseElement(final int currentChar) throws JsonParseException {
-		final STATE nextState = this.getRoot().nextState(
-			(char) currentChar);
+		final STATE nextState = this.getRoot().nextState((char) currentChar);
 		if (nextState == null)
 			throw this.getParseException(this.getRoot().getName(), "one of ['{', '[', 't', 'f', 'n', 0-9, '\"', '-']",
 				String.valueOf((char) currentChar));

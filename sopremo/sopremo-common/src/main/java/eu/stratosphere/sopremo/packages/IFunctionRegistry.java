@@ -17,7 +17,6 @@ package eu.stratosphere.sopremo.packages;
 import java.lang.reflect.Method;
 
 import eu.stratosphere.sopremo.function.Callable;
-import eu.stratosphere.sopremo.function.SopremoFunction;
 
 /**
  * Registry that manages {@link SopremoFunction}s.

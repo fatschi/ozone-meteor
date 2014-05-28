@@ -110,7 +110,8 @@ public class FunctionRegistryTest {
 		Assert.assertNotNull(method);
 		return method.call(JsonUtil.asArray(parameters));
 	}
-
+	
+	@SuppressWarnings("unused") 
 	public static class JavaFunctions {
 
 		@Name(verb = "count")

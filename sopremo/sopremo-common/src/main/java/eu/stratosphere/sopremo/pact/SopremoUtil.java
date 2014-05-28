@@ -35,7 +35,6 @@ import eu.stratosphere.sopremo.function.SopremoFunction;
 import eu.stratosphere.sopremo.type.IArrayNode;
 import eu.stratosphere.sopremo.type.IJsonNode;
 import eu.stratosphere.sopremo.type.IObjectNode;
-import eu.stratosphere.sopremo.type.AbstractReusingSerializer;
 import eu.stratosphere.sopremo.type.ReusingSerializer;
 import eu.stratosphere.sopremo.type.typed.ITypedObjectNode;
 import eu.stratosphere.sopremo.type.typed.TypedObjectNode;
