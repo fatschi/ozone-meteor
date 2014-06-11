@@ -167,7 +167,7 @@ public class SopremoRecord extends AbstractSopremoType implements ISopremoType {
 			to.offsets = this.offsets.clone();
 		} else
 			to.binaryRepresentation.clear();
-		to.node = SopremoUtil.copyInto(this.node, to.node);
+		to.node = SopremoUtil.copyInto(this.getOrParseNode(), to.node);
 	}
 
 	@Override

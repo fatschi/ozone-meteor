@@ -47,6 +47,15 @@ public final class ReusingFieldSerializer<T> extends FieldSerializer<T> implemen
 		this.oldInstance = oldInstance;
 		return super.read(kryo, input, type);
 	}
+	
+	/* (non-Javadoc)
+	 * @see com.esotericsoftware.kryo.serializers.FieldSerializer#read(com.esotericsoftware.kryo.Kryo, com.esotericsoftware.kryo.io.Input, java.lang.Class)
+	 */
+	@Override
+	public T read(Kryo kryo, Input input, Class<T> type) {
+		this.oldInstance = null;
+		return super.read(kryo, input, type);
+	}
 
 	/*
 	 * (non-Javadoc)

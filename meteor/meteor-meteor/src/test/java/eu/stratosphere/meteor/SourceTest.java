@@ -16,7 +16,6 @@ package eu.stratosphere.meteor;
 
 import org.junit.Test;
 
-import eu.stratosphere.meteor.MeteorTest;
 import eu.stratosphere.sopremo.io.JsonFormat;
 import eu.stratosphere.sopremo.io.Sink;
 import eu.stratosphere.sopremo.io.Source;
@@ -77,8 +76,8 @@ public class SourceTest extends MeteorTest {
 				"write $input to 'output.json';");
 
 		final SopremoPlan expectedPlan = new SopremoPlan();
-		final Source input = new Source(new JsonFormat(), "hdfs://cluster:1234/mydir/input.json");
-		final Sink output = new Sink("file://output.json").withInputs(input);
+		final Source input = new Source(new JsonFormat(), "hdfs://input.json");
+		final Sink output = new Sink("hdfs://cluster:1234/mydir/output.json").withInputs(input);
 		expectedPlan.setSinks(output);
 
 		assertPlanEquals(expectedPlan, actualPlan);

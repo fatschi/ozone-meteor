@@ -150,7 +150,7 @@ public class SopremoRecordPostPass extends GenericFlatTypePostPass<Class<? exten
 			if (sortFields[index] != SopremoRecordLayout.VALUE_INDEX)
 				sortFields[index] = Arrays.binarySearch(usedKeys, sortFields[index]);
 		return new SopremoRecordComparatorFactory(this.layout.project(usedKeys), this.typeRegistry, sortFields, directions);
-		// return new SopremoRecordComparatorFactory(this.layout, this.typeRegistry, fields.toArray(), directions);
+//		 return new SopremoRecordComparatorFactory(this.layout, this.typeRegistry, fields.toArray(), directions);
 	}
 
 	/*
@@ -175,7 +175,7 @@ public class SopremoRecordPostPass extends GenericFlatTypePostPass<Class<? exten
 	 */
 	@Override
 	protected TypeSerializerFactory<?> createSerializer(final SopremoRecordSchema schema) {
-		// return new SopremoRecordSerializerFactory(this.layout, this.typeRegistry);
+//		 return new SopremoRecordSerializerFactory(this.layout, this.typeRegistry);
 		return new SopremoRecordSerializerFactory(this.layout.project(schema.getUsedKeys().toIntArray()), this.typeRegistry);
 	}
 
@@ -188,7 +188,7 @@ public class SopremoRecordPostPass extends GenericFlatTypePostPass<Class<? exten
 					layouts.put(((SopremoRecordSerializerFactory) channel.getSerializer()).getLayout(), channel);
 
 				// we need indeed different layouts; create a dummy map node for each layout
-				if (layouts.size() > 1) {
+				if (layouts.keySet().size() > 1) {
 					// layout to dummy node is empty, so we can ignore all nodes that also require empty layout
 					layouts.removeAll(SopremoRecordLayout.EMPTY);
 

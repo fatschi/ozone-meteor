@@ -17,12 +17,12 @@ package eu.stratosphere.meteor;
 import java.io.File;
 import java.util.List;
 import java.util.TreeSet;
-import java.util.regex.Joiner;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.junit.Assert;
 import junit.framework.AssertionFailedError;
 
+import org.junit.Assert;
 import org.junit.Ignore;
 
 import eu.stratosphere.sopremo.operator.Operator;
@@ -35,7 +35,7 @@ import eu.stratosphere.sopremo.query.QueryParserException;
 public class MeteorTest {
 	protected String findVars(final String script) {
 		TreeSet<String> vars = new TreeSet<String>();
-		Joiner matcher = Pattern.compile("\\$\\w+").matcher(script);
+		Matcher matcher = Pattern.compile("\\$\\w+").matcher(script);
 		while (matcher.find())
 			vars.add(matcher.group());
 		String varString = vars.toString();
@@ -87,9 +87,9 @@ public class MeteorTest {
 		final List<Operator<?>> unmatchingOperators = actualPlan.getUnmatchingOperators(expectedPlan);
 		if (!unmatchingOperators.isEmpty())
 			if (unmatchingOperators.get(0).getClass() == unmatchingOperators.get(1).getClass())
-				Assert.failNotEquals("operators are different", "\n" + unmatchingOperators.get(1), "\n"
+				Assert.fail("operators are different; expected: \n" + unmatchingOperators.get(1) + "\nbut was: \n"
 					+ unmatchingOperators.get(0));
 			else
-				Assert.failNotEquals("plans are different", expectedPlan, actualPlan);
+				Assert.fail("plans are different; expected: \n" + expectedPlan + "\nbut was: \n" + actualPlan);
 	}
 }

@@ -291,6 +291,8 @@ functionReference
 fieldAssignment
 	:	((ID ':')=> ID ':' expression 
     { $objectCreation::mappings.add(new ObjectCreation.FieldAssignment($ID.text, $expression.tree)); } -> )
+  | (('"' ID '"' ':')=> '"' ID '"' ':' expression 
+    { $objectCreation::mappings.add(new ObjectCreation.FieldAssignment($ID.text, $expression.tree)); } -> )
   | (VAR '.' STAR)=> VAR '.' STAR { $objectCreation::mappings.add(new ObjectCreation.CopyFields(getInputSelection($VAR))); } ->
   | (VAR)=> p=generalPathExpression (
     (':')=> ':' e2=expression { $objectCreation::mappings.add(new ObjectCreation.SymbolicAssignment($p.tree, $e2.tree)); } ->

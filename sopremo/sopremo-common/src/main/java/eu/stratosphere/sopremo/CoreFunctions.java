@@ -514,4 +514,11 @@ public class CoreFunctions implements BuiltinProvider {
 		SopremoEnvironment.getInstance().getEvaluationContext().setWorkingPath(new Path(path));
 		return MissingNode.getInstance();
 	}
+
+	@Name(verb = "hdfs")
+	public static TextNode hdfsPrefix(final TextNode node) {
+		TextNode result = new TextNode("hdfs://");
+		result.append(node);
+		return result;
+	}
 }

@@ -15,7 +15,6 @@
 package eu.stratosphere.meteor.expression;
 
 import org.junit.Assert;
-
 import org.junit.Test;
 
 import eu.stratosphere.meteor.MeteorTest;
@@ -30,11 +29,11 @@ import eu.stratosphere.sopremo.expressions.FunctionCall;
 import eu.stratosphere.sopremo.expressions.InputSelection;
 import eu.stratosphere.sopremo.expressions.ObjectCreation;
 import eu.stratosphere.sopremo.function.ExpressionFunction;
-import eu.stratosphere.sopremo.function.FunctionNode;
 import eu.stratosphere.sopremo.function.JavaMethod;
 import eu.stratosphere.sopremo.io.Sink;
 import eu.stratosphere.sopremo.io.Source;
 import eu.stratosphere.sopremo.operator.SopremoPlan;
+import eu.stratosphere.sopremo.type.FunctionNode;
 import eu.stratosphere.sopremo.type.IJsonNode;
 import eu.stratosphere.sopremo.type.JsonUtil;
 
@@ -50,8 +49,6 @@ public class SecondOrderFunctionTest extends MeteorTest {
 			"write $result to 'file://output.json'; ");
 
 		final SopremoPlan expectedPlan = new SopremoPlan();
-		final EvaluationContext context = expectedPlan.getEvaluationContext();
-		context.getFunctionRegistry().put(SecondOrderFunctions.class);
 		final ExpressionFunction squareFunction = new ExpressionFunction(1,
 			new ArithmeticExpression(JsonUtil.createPath("0", "a"), ArithmeticOperator.MULTIPLICATION,
 				JsonUtil.createPath("0", "b")));
@@ -63,7 +60,7 @@ public class SecondOrderFunctionTest extends MeteorTest {
 			withGroupingKey(0, JsonUtil.createPath("0", "key")).
 			withResultProjection(new ObjectCreation(
 				new ObjectCreation.FieldAssignment("squared",
-					new FunctionCall("map", context, new InputSelection(0), functionNode))));
+					new FunctionCall(SecondOrderFunctions.MAP, new InputSelection(0), functionNode))));
 		final Sink sink = new Sink("file://output.json").withInputs(projection);
 		expectedPlan.setSinks(sink);
 
@@ -79,8 +76,6 @@ public class SecondOrderFunctionTest extends MeteorTest {
 				"write $result to 'file://output.json'; ");
 
 		final SopremoPlan expectedPlan = new SopremoPlan();
-		final EvaluationContext context = expectedPlan.getEvaluationContext();
-		context.getFunctionRegistry().put(SecondOrderFunctions.class);
 		final JavaMethod javaMethod = new JavaMethod("testudf");
 		javaMethod.addSignature(this.getClass().getMethod("udfTest", IJsonNode[].class));
 		final ConstantExpression functionNode = new ConstantExpression(new FunctionNode(javaMethod));
@@ -89,7 +84,7 @@ public class SecondOrderFunctionTest extends MeteorTest {
 		final Grouping projection = new Grouping().
 			withInputs(input).
 			withGroupingKey(0, JsonUtil.createPath("0", "key")).
-			withResultProjection(new FunctionCall("map", context, new InputSelection(0), functionNode));
+			withResultProjection(new FunctionCall(SecondOrderFunctions.MAP, new InputSelection(0), functionNode));
 		final Sink sink = new Sink("file://output.json").withInputs(projection);
 		expectedPlan.setSinks(sink);
 
@@ -104,8 +99,6 @@ public class SecondOrderFunctionTest extends MeteorTest {
 				"write $result to 'file://output.json'; ");
 
 		final SopremoPlan expectedPlan = new SopremoPlan();
-		final EvaluationContext context = expectedPlan.getEvaluationContext();
-		context.getFunctionRegistry().put(SecondOrderFunctions.class);
 		final ExpressionFunction squareFunction = new ExpressionFunction(1,
 			new ArithmeticExpression(JsonUtil.createPath("0", "a"), ArithmeticOperator.MULTIPLICATION,
 				JsonUtil.createPath("0", "b")));
@@ -116,7 +109,7 @@ public class SecondOrderFunctionTest extends MeteorTest {
 			withInputs(input).
 			withGroupingKey(0, JsonUtil.createPath("0", "key")).
 			withResultProjection(new ArrayCreation(
-				new FunctionCall("map", context, new InputSelection(0), functionNode)));
+				new FunctionCall(SecondOrderFunctions.MAP, new InputSelection(0), functionNode)));
 		final Sink sink = new Sink("file://output.json").withInputs(projection);
 		expectedPlan.setSinks(sink);
 

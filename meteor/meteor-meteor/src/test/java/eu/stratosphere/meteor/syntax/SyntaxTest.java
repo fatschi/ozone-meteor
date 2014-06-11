@@ -15,6 +15,7 @@
 package eu.stratosphere.meteor.syntax;
 
 import org.junit.Assert;
+
 import eu.stratosphere.meteor.MeteorTest;
 import eu.stratosphere.meteor.QueryParser;
 import eu.stratosphere.sopremo.operator.SopremoPlan;

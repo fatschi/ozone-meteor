@@ -18,7 +18,6 @@ import org.junit.Test;
 
 import eu.stratosphere.meteor.MeteorTest;
 import eu.stratosphere.sopremo.CoreFunctions;
-import eu.stratosphere.sopremo.SopremoTestUtil;
 import eu.stratosphere.sopremo.aggregation.ArrayAccessAsAggregation;
 import eu.stratosphere.sopremo.base.Grouping;
 import eu.stratosphere.sopremo.base.Selection;
@@ -29,9 +28,12 @@ import eu.stratosphere.sopremo.expressions.ComparativeExpression.BinaryOperator;
 import eu.stratosphere.sopremo.expressions.ConstantExpression;
 import eu.stratosphere.sopremo.expressions.ObjectAccess;
 import eu.stratosphere.sopremo.expressions.ObjectCreation;
+import eu.stratosphere.sopremo.function.FunctionUtil;
 import eu.stratosphere.sopremo.io.Sink;
 import eu.stratosphere.sopremo.io.Source;
 import eu.stratosphere.sopremo.operator.SopremoPlan;
+import eu.stratosphere.sopremo.testing.SopremoTestUtil;
+import eu.stratosphere.sopremo.type.JsonUtil;
 
 /**
  */
@@ -55,21 +57,18 @@ public class AggregationTest extends MeteorTest {
 			withCondition(new ComparativeExpression(new ObjectAccess("l_linenumber"),
 				BinaryOperator.GREATER_EQUAL,
 				new ConstantExpression(1)));
-		final BatchAggregationExpression batch = new BatchAggregationExpression();
-		final Grouping grouping = new Grouping()
-			.
-			withInputs(filter)
-			.
-			withGroupingKey(0, new ArrayCreation(new ObjectAccess("l_linestatus"), new ObjectAccess("l_returnflag")))
-			.
+		final Grouping grouping = new Grouping().
+			withInputs(filter).
+			withGroupingKey(0, new ArrayCreation(JsonUtil.createPath("0", "l_linestatus"), JsonUtil.createPath("0", "l_returnflag"))).
 			withResultProjection(
 				new ObjectCreation(
-					new ObjectCreation.FieldAssignment("first", batch.add(new ArrayAccessAsAggregation(0))),
-					new ObjectCreation.FieldAssignment("count_qty", batch.add(CoreFunctions.COUNT)),
-					new ObjectCreation.FieldAssignment("sum_qty", batch.add(CoreFunctions.SUM, new ObjectAccess(
-						"l_quantity"))),
-					new ObjectCreation.FieldAssignment("mean_qty", batch.add(CoreFunctions.MAX, new ObjectAccess(
-						"l_quantity")))
+					new ObjectCreation.FieldAssignment("first", JsonUtil.createPath("0", "[0]")),
+					new ObjectCreation.FieldAssignment("count_qty",
+						FunctionUtil.createFunctionCall(CoreFunctions.COUNT, JsonUtil.createPath("0"))),
+					new ObjectCreation.FieldAssignment("sum_qty",
+						FunctionUtil.createFunctionCall(CoreFunctions.SUM, JsonUtil.createPath("0", "l_quantity"))),
+					new ObjectCreation.FieldAssignment("mean_qty",
+						FunctionUtil.createFunctionCall(CoreFunctions.MAX, JsonUtil.createPath("0", "l_quantity")))
 				));
 
 		final Sink sink = new Sink("file://q1.json").withInputs(grouping);

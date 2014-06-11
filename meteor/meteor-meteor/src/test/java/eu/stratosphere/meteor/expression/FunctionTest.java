@@ -15,7 +15,6 @@
 package eu.stratosphere.meteor.expression;
 
 import org.junit.Assert;
-
 import org.junit.Test;
 
 import eu.stratosphere.meteor.MeteorTest;
@@ -68,12 +67,10 @@ public class FunctionTest extends MeteorTest {
 		final Source input = new Source("file://input.json");
 		final JavaMethod javaMethod = new JavaMethod("testudf");
 		javaMethod.addSignature(this.getClass().getMethod("udfTest", IJsonNode[].class));
-		final Projection projection =
-			new Projection().
-				withInputs(input).
-				withResultProjection(new ObjectCreation(
-					new ObjectCreation.FieldAssignment("squared", new FunctionCall("testudf", javaMethod,
-						new InputSelection(0)))));
+		final Projection projection = new Projection().withInputs(input).
+			withResultProjection(new ObjectCreation(
+				new ObjectCreation.FieldAssignment("squared", new FunctionCall(javaMethod,
+					new InputSelection(0)))));
 		final Sink sink = new Sink("file://output.json").withInputs(projection);
 		expectedPlan.setSinks(sink);
 
