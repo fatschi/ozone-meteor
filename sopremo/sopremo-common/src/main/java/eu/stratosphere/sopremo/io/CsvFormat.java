@@ -872,7 +872,7 @@ public class CsvFormat extends SopremoFormat {
 		protected void detectKeyNames(final IJsonNode value) {
 			final List<Entry<String, IJsonNode>> values = Lists.newArrayList(((IObjectNode) value).iterator());
 			this.keyNames = new ArrayList<String>(values.size());
-			for (int index = 0; index < this.keyNames.size(); index++)
+			for (int index = 0; index < values.size(); index++)
 				this.keyNames.add(values.get(index).getKey());
 			if (this.keyNames.isEmpty())
 				throw new IllegalStateException("Found empty object and cannot detect key names");

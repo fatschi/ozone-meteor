@@ -146,7 +146,7 @@ public class SopremoTestServer implements Closeable, SopremoExecutionProtocol {
 	private List<IJsonNode> canonicalize(List<IJsonNode> values, EvaluationExpression canonicalizer) {
 		ArrayList<IJsonNode> canonicalizedValues = new ArrayList<IJsonNode>();
 		for (IJsonNode value : values)
-			canonicalizedValues.add(canonicalizer.evaluate(value));
+			canonicalizedValues.add(canonicalizer.evaluate(value).clone());
 		return canonicalizedValues;
 	}
 

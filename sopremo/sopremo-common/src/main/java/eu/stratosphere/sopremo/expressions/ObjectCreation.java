@@ -28,6 +28,7 @@ import eu.stratosphere.sopremo.type.IArrayNode;
 import eu.stratosphere.sopremo.type.IJsonNode;
 import eu.stratosphere.sopremo.type.IObjectNode;
 import eu.stratosphere.sopremo.type.MissingNode;
+import eu.stratosphere.sopremo.type.NullNode;
 import eu.stratosphere.sopremo.type.ObjectNode;
 
 /**
@@ -249,7 +250,7 @@ public class ObjectCreation extends EvaluationExpression {
 		@Override
 		protected void evaluate(final IJsonNode node, final IObjectNode target) {
 			final IJsonNode exprNode = this.getExpression().evaluate(node);
-			if (!(exprNode instanceof MissingNode))
+			if (!(exprNode instanceof MissingNode) && !(exprNode instanceof NullNode))
 				target.putAll((IObjectNode) exprNode);
 		}
 	}
