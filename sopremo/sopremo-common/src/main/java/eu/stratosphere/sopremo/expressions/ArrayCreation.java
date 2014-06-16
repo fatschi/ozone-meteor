@@ -17,6 +17,7 @@ package eu.stratosphere.sopremo.expressions;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import eu.stratosphere.sopremo.expressions.tree.ChildIterator;
@@ -57,7 +58,7 @@ public class ArrayCreation extends EvaluationExpression {
 	 * @param elements
 	 *        the expressions that evaluate to the elements in the array
 	 */
-	public ArrayCreation(final List<EvaluationExpression> elements) {
+	public ArrayCreation(final Collection<EvaluationExpression> elements) {
 		this.elements = new ArrayList<EvaluationExpression>(elements);
 	}
 
