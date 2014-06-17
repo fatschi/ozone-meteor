@@ -18,7 +18,6 @@ import java.io.IOException;
 
 import eu.stratosphere.sopremo.cache.NodeCache;
 import eu.stratosphere.sopremo.expressions.tree.ChildIterator;
-import eu.stratosphere.sopremo.expressions.tree.ConcatenatingNamedChildIterator;
 import eu.stratosphere.sopremo.expressions.tree.NamedChildIterator;
 import eu.stratosphere.sopremo.type.BooleanNode;
 import eu.stratosphere.sopremo.type.IJsonNode;
@@ -27,7 +26,7 @@ import eu.stratosphere.sopremo.type.TypeCoercer;
 /**
  * Represents a if-then-else clause.
  */
-public class TernaryExpression extends PathSegmentExpression {
+public class TernaryExpression extends EvaluationExpression {
 
 	private EvaluationExpression ifClause;
 
@@ -115,44 +114,41 @@ public class TernaryExpression extends PathSegmentExpression {
 	 */
 	@Override
 	public ChildIterator iterator() {
-		return new ConcatenatingNamedChildIterator(super.namedChildIterator(),
-			new NamedChildIterator("ifClause", "ifExpression", "thenExpression") {
-				@Override
-				protected EvaluationExpression get(final int index) {
-					switch (index) {
-					case 0:
-						return TernaryExpression.this.ifClause;
-					case 1:
-						return TernaryExpression.this.ifExpression;
-					default:
-						return TernaryExpression.this.thenExpression;
-					}
+		return new NamedChildIterator("ifClause", "ifExpression", "thenExpression") {
+			@Override
+			protected EvaluationExpression get(final int index) {
+				switch (index) {
+				case 0:
+					return TernaryExpression.this.ifClause;
+				case 1:
+					return TernaryExpression.this.ifExpression;
+				default:
+					return TernaryExpression.this.thenExpression;
 				}
+			}
 
-				@Override
-				protected void set(final int index, final EvaluationExpression childExpression) {
-					switch (index) {
-					case 0:
-						TernaryExpression.this.ifClause = childExpression;
-						break;
-					case 1:
-						TernaryExpression.this.ifExpression = childExpression;
-						break;
-					default:
-						TernaryExpression.this.thenExpression = childExpression;
-					}
+			@Override
+			protected void set(final int index, final EvaluationExpression childExpression) {
+				switch (index) {
+				case 0:
+					TernaryExpression.this.ifClause = childExpression;
+					break;
+				case 1:
+					TernaryExpression.this.ifExpression = childExpression;
+					break;
+				default:
+					TernaryExpression.this.thenExpression = childExpression;
 				}
-			});
+			}
+		};
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see
-	 * eu.stratosphere.sopremo.expressions.PathSegmentExpression#equalsSameClass(eu.stratosphere.sopremo.expressions
-	 * .PathSegmentExpression)
+	 * @see eu.stratosphere.sopremo.expressions.EvaluationExpression#equals(java.lang.Object)
 	 */
 	@Override
-	protected boolean equalsSameClass(final PathSegmentExpression obj) {
+	public boolean equals(Object obj) {
 		final TernaryExpression other = (TernaryExpression) obj;
 		return this.ifClause.equals(other.ifClause)
 			&& this.ifExpression.equals(other.ifExpression)
@@ -161,11 +157,10 @@ public class TernaryExpression extends PathSegmentExpression {
 
 	/*
 	 * (non-Javadoc)
-	 * @see
-	 * eu.stratosphere.sopremo.expressions.PathSegmentExpression#evaluateSegment(eu.stratosphere.sopremo.type.IJsonNode)
+	 * @see eu.stratosphere.sopremo.expressions.EvaluationExpression#evaluate(eu.stratosphere.sopremo.type.IJsonNode)
 	 */
 	@Override
-	protected IJsonNode evaluateSegment(final IJsonNode node) {
+	public IJsonNode evaluate(IJsonNode node) {
 		// no need to reuse the target of the coercion - a boolean node is never created anew
 		if (TypeCoercer.INSTANCE.coerce(this.ifClause.evaluate(node), this.nodeCache, BooleanNode.class) == BooleanNode.TRUE)
 			return this.ifExpression.evaluate(node);
@@ -174,10 +169,10 @@ public class TernaryExpression extends PathSegmentExpression {
 
 	/*
 	 * (non-Javadoc)
-	 * @see eu.stratosphere.sopremo.expressions.PathSegmentExpression#segmentHashCode()
+	 * @see eu.stratosphere.sopremo.expressions.EvaluationExpression#hashCode()
 	 */
 	@Override
-	protected int segmentHashCode() {
+	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + this.ifClause.hashCode();
