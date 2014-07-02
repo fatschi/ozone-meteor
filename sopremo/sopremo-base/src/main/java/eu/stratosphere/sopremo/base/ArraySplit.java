@@ -22,15 +22,15 @@ import eu.stratosphere.sopremo.type.NullNode;
 @InputCardinality(1)
 @Name(verb = "split array")
 public class ArraySplit extends ElementaryOperator<ArraySplit> {
-	private EvaluationExpression arrayPath = EvaluationExpression.VALUE, splitProjection = new ArrayAccess(0);
+	private EvaluationExpression arrayPath = EvaluationExpression.VALUE;
+
+	{
+		setResultProjection(new ArrayAccess(0));
+	}
 
 	public EvaluationExpression getArrayPath() {
 		return this.arrayPath;
 	};
-
-	public EvaluationExpression getSplitProjection() {
-		return this.splitProjection;
-	}
 
 	/**
 	 * Sets the arrayPath to the specified value.
@@ -49,25 +49,17 @@ public class ArraySplit extends ElementaryOperator<ArraySplit> {
 
 	/**
 	 * (element, index, array, node) -&gt; value
-	 * 
-	 * @param elementProjection
 	 */
-	@Property
-	@Name(preposition = "into")
-	public void setSplitProjection(final EvaluationExpression elementProjection) {
-		if (elementProjection == null)
-			throw new NullPointerException("elementProjection must not be null");
-		this.splitProjection = elementProjection;
-	}
-
-	/**
-	 * (element, index, array, node) -&gt; value
-	 */
-	public void setSplitProjection(final ResultField... fields) {
+	public void setResultProjection(final ResultField... fields) {
 		final int[] indices = new int[fields.length];
 		for (int index = 0; index < indices.length; index++)
 			indices[index] = fields[index].ordinal();
-		this.setSplitProjection(ArrayAccess.arrayWithIndices(indices));
+		this.setResultProjection(ArrayAccess.arrayWithIndices(indices));
+	}
+
+	public ArraySplit withResultProjection(final ResultField... fields) {
+		this.setResultProjection(fields);
+		return this;
 	}
 
 	public ArraySplit withArrayPath(final EvaluationExpression arrayPath) {
@@ -75,31 +67,8 @@ public class ArraySplit extends ElementaryOperator<ArraySplit> {
 		return this;
 	}
 
-	/**
-	 * (element, index, array, node) -&gt; value
-	 * 
-	 * @param valueProjection
-	 * @return this
-	 */
-	public ArraySplit withSplitProjection(final EvaluationExpression valueProjection) {
-		this.setSplitProjection(valueProjection);
-		return this;
-	}
-
-	/**
-	 * (element, index, array, node) -&gt; value
-	 * 
-	 * @return this
-	 */
-	public ArraySplit withSplitProjection(final ResultField... fields) {
-		this.setSplitProjection(fields);
-		return this;
-	}
-
 	public static class Implementation extends SopremoMap {
 		private EvaluationExpression arrayPath;
-
-		private EvaluationExpression splitProjection;
 
 		@Override
 		protected void map(final IJsonNode value, final JsonCollector<IJsonNode> out) {
@@ -114,7 +83,7 @@ public class ArraySplit extends ElementaryOperator<ArraySplit> {
 			for (final IJsonNode element : array) {
 				contextNode.set(0, element);
 				indexNode.setValue(index);
-				out.collect(this.splitProjection.evaluate(contextNode));
+				out.collect(contextNode);
 				index++;
 			}
 		}

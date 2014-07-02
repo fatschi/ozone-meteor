@@ -135,4 +135,8 @@ public class ArrayCreation extends EvaluationExpression {
 	public int size() {
 		return this.elements.size();
 	}
+
+	public void set(int index, EvaluationExpression evaluationExpression) {
+		this.elements.set(index, evaluationExpression);
+	}
 }

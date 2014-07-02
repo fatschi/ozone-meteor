@@ -23,7 +23,7 @@ public class ReplaceAll extends ReplaceBase<ReplaceAll> {
 		final ArraySplit arraySplit =
 			new ArraySplit().
 				withArrayPath(this.getReplaceExpression()).
-				withSplitProjection(ArraySplit.ResultField.Element, ArraySplit.ResultField.Index,
+				withResultProjection(ArraySplit.ResultField.Element, ArraySplit.ResultField.Index,
 					ArraySplit.ResultField.Array).
 				withInputs(module.getInput(0));
 
