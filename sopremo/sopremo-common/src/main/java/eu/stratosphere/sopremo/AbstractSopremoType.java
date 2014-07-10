@@ -27,7 +27,7 @@ public abstract class AbstractSopremoType implements ISopremoType {
 	 */
 	@Override
 	public AbstractSopremoType clone() {
-		return SopremoEnvironment.getInstance().getEvaluationContext().getKryo().copy(this);
+		return SopremoEnvironment.getInstance().getEvaluationContext().getKryo(getClass().getClassLoader()).copy(this);
 	}
 
 	@SuppressWarnings("unchecked")

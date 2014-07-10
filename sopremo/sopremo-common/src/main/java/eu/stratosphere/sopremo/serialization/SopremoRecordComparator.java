@@ -63,6 +63,8 @@ public final class SopremoRecordComparator extends TypeComparator<SopremoRecord>
 		for (int index = 0; index < this.keyExpressionIndices.length; index++) {
 			this.nodeCache1[index] = new NodeCache(CachingNodeFactory.getInstance());
 			this.nodeCache2[index] = new NodeCache(CachingNodeFactory.getInstance());
+			if(this.keyExpressionIndices[index] == -1)
+				throw new IllegalArgumentException();
 			this.keyExpressions[index] = layout.getExpression(this.keyExpressionIndices[index]);
 		}
 		this.ascending = ascending;

@@ -41,6 +41,7 @@ import eu.stratosphere.compiler.CompilerException;
 import eu.stratosphere.compiler.CompilerPostPassException;
 import eu.stratosphere.compiler.dag.MapNode;
 import eu.stratosphere.compiler.dag.TempMode;
+import eu.stratosphere.compiler.dataproperties.GlobalProperties;
 import eu.stratosphere.compiler.dataproperties.LocalProperties;
 import eu.stratosphere.compiler.operators.MapDescriptor;
 import eu.stratosphere.compiler.plan.Channel;
@@ -51,6 +52,7 @@ import eu.stratosphere.compiler.plan.PlanNode;
 import eu.stratosphere.compiler.plan.SingleInputPlanNode;
 import eu.stratosphere.compiler.plan.SinkPlanNode;
 import eu.stratosphere.compiler.plan.SourcePlanNode;
+import eu.stratosphere.compiler.plan.WorksetIterationPlanNode;
 import eu.stratosphere.compiler.postpass.ConflictingFieldTypeInfoException;
 import eu.stratosphere.compiler.postpass.GenericFlatTypePostPass;
 import eu.stratosphere.compiler.postpass.MissingFieldTypeInfoException;
@@ -71,6 +73,8 @@ public class SopremoRecordPostPass extends GenericFlatTypePostPass<Class<? exten
 
 	private ITypeRegistry typeRegistry;
 
+	private final static boolean PRUNE_LAYOUT = true;
+
 	/*
 	 * (non-Javadoc)
 	 * @see
@@ -88,7 +92,8 @@ public class SopremoRecordPostPass extends GenericFlatTypePostPass<Class<? exten
 
 		this.removeDummyNodes(plan);
 		super.postPass(plan);
-		this.addIdentityMapsToOutputsWithMultipleChannels(plan);
+		if (PRUNE_LAYOUT)
+			this.addIdentityMapsToOutputsWithMultipleChannels(plan);
 	}
 
 	/*
@@ -143,14 +148,16 @@ public class SopremoRecordPostPass extends GenericFlatTypePostPass<Class<? exten
 	@Override
 	protected TypeComparatorFactory<?> createComparator(final FieldList fields, final boolean[] directions,
 			final SopremoRecordSchema schema) {
-		final int[] usedKeys = schema.getUsedKeys().toIntArray();
-		final int[] sortFields = fields.toArray();
+		if (PRUNE_LAYOUT) {
+			final int[] usedKeys = schema.getUsedKeys().toIntArray();
+			final int[] sortFields = fields.toArray();
 
-		for (int index = 0; index < sortFields.length; index++)
-			if (sortFields[index] != SopremoRecordLayout.VALUE_INDEX)
-				sortFields[index] = Arrays.binarySearch(usedKeys, sortFields[index]);
-		return new SopremoRecordComparatorFactory(this.layout.project(usedKeys), this.typeRegistry, sortFields, directions);
-//		 return new SopremoRecordComparatorFactory(this.layout, this.typeRegistry, fields.toArray(), directions);
+			for (int index = 0; index < sortFields.length; index++)
+				if (sortFields[index] != SopremoRecordLayout.VALUE_INDEX)
+					sortFields[index] = Arrays.binarySearch(usedKeys, sortFields[index]);
+			return new SopremoRecordComparatorFactory(this.layout.project(usedKeys), this.typeRegistry, sortFields, directions);
+		}
+		return new SopremoRecordComparatorFactory(this.layout, this.typeRegistry, fields.toArray(), directions);
 	}
 
 	/*
@@ -175,8 +182,9 @@ public class SopremoRecordPostPass extends GenericFlatTypePostPass<Class<? exten
 	 */
 	@Override
 	protected TypeSerializerFactory<?> createSerializer(final SopremoRecordSchema schema) {
-//		 return new SopremoRecordSerializerFactory(this.layout, this.typeRegistry);
-		return new SopremoRecordSerializerFactory(this.layout.project(schema.getUsedKeys().toIntArray()), this.typeRegistry);
+		if (PRUNE_LAYOUT)
+			return new SopremoRecordSerializerFactory(this.layout.project(schema.getUsedKeys().toIntArray()), this.typeRegistry);
+		return new SopremoRecordSerializerFactory(this.layout, this.typeRegistry);
 	}
 
 	private void addIdentityMapsToOutputsWithMultipleChannels(OptimizedPlan plan) {
@@ -200,6 +208,8 @@ public class SopremoRecordPostPass extends GenericFlatTypePostPass<Class<? exten
 
 						MapDescriptor mapDescriptor = new MapDescriptor();
 						MapNode mapNode = new MapNode(new MapOperatorBase<IdentityMap>(IdentityMap.class, "dummy"));
+						mapNode.setDegreeOfParallelism(node.getDegreeOfParallelism());
+						mapNode.setSubtasksPerInstance(node.getSubtasksPerInstance());
 						SingleInputPlanNode dummyNode = mapDescriptor.instantiate(inMemoryChannel, mapNode);
 						inMemoryChannel.setTarget(dummyNode);
 						inMemoryChannel.setSerializer(new SopremoRecordSerializerFactory(SopremoRecordLayout.EMPTY, registry));
@@ -211,7 +221,9 @@ public class SopremoRecordPostPass extends GenericFlatTypePostPass<Class<? exten
 							if (target instanceof SingleInputPlanNode)
 								ReflectUtil.setField(target, "input", channelWithNewSource);
 							else if (target instanceof DualInputPlanNode) {
-								if (((DualInputPlanNode) target).getInput1() == originalChannel)
+								if (target instanceof WorksetIterationPlanNode) {
+									System.out.println(target);
+								} else if (((DualInputPlanNode) target).getInput1() == originalChannel)
 									ReflectUtil.setField(target, "input1", channelWithNewSource);
 								else
 									ReflectUtil.setField(target, "input2", channelWithNewSource);
@@ -243,6 +255,15 @@ public class SopremoRecordPostPass extends GenericFlatTypePostPass<Class<? exten
 		@Override
 		public void adjustGlobalPropertiesForFullParallelismChange() {
 			this.originalChannel.adjustGlobalPropertiesForFullParallelismChange();
+		}
+
+		/**
+		 * @return
+		 * @see eu.stratosphere.compiler.plan.Channel#getGlobalProperties()
+		 */
+		@Override
+		public GlobalProperties getGlobalProperties() {
+			return this.originalChannel.getGlobalProperties();
 		}
 
 		/**
@@ -638,13 +659,22 @@ public class SopremoRecordPostPass extends GenericFlatTypePostPass<Class<? exten
 	protected void getSingleInputNodeSchema(final SingleInputPlanNode node, final SopremoRecordSchema schema)
 			throws CompilerPostPassException, ConflictingFieldTypeInfoException
 	{
-		// check that we got the right types
-		final SingleInputOperator<?> contract = node.getSingleInputNode().getPactContract();
 
 		// add the information to the schema
-		final int[] localPositions = contract.getKeyColumns(0);
-		for (int i = 0; i < localPositions.length; i++)
-			schema.add(localPositions[i]);
+		FieldList groupedFields = node.getLocalProperties().getGroupedFields();
+		if (groupedFields != null)
+			for (int i = 0; i < groupedFields.size(); i++)
+				schema.add(groupedFields.get(i));
+
+		FieldList partitioning = node.getGlobalProperties().getPartitioningFields();
+		if (partitioning != null)
+			for (int i = 0; i < partitioning.size(); i++)
+				schema.add(partitioning.get(i));
+
+		SingleInputOperator<?> contract = node.getSingleInputNode().getPactContract();
+		int[] keyColumns = contract.getKeyColumns(0);
+		for (int index = 0; index < keyColumns.length; index++)
+			schema.add(keyColumns[index]);
 
 		// this is a temporary fix, we should solve this more generic
 		if (contract instanceof SopremoReduceOperator) {

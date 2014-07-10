@@ -17,6 +17,7 @@ package eu.stratosphere.sopremo;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -45,7 +46,7 @@ public class EvaluationContext extends AbstractSopremoType {
 
 	private int taskId;
 
-	private final transient Kryo kryo;
+	private final transient Map<ClassLoader, SopremoKryo> kryo = new IdentityHashMap<ClassLoader, SopremoKryo>();
 
 	private final Map<String, Object> contextParameters = new HashMap<String, Object>();
 
@@ -63,8 +64,6 @@ public class EvaluationContext extends AbstractSopremoType {
 		this.nameChooserProvider = nameChooserProvider;
 
 		this.workingPath = new Path(new File(".").toURI().toString()).toString();
-
-		this.kryo = new SopremoKryo();
 	}
 
 	/**
@@ -147,7 +146,16 @@ public class EvaluationContext extends AbstractSopremoType {
 	 * @see eu.stratosphere.sopremo.AbstractSopremoType#getKryo()
 	 */
 	public Kryo getKryo() {
-		return this.kryo;
+		return getKryo(getClass().getClassLoader());
+	}
+
+	public Kryo getKryo(ClassLoader classLoader) {
+		SopremoKryo kryo = this.kryo.get(classLoader);
+		if (kryo == null) {
+			this.kryo.put(classLoader, kryo = new SopremoKryo());
+			kryo.setClassLoader(classLoader);
+		}
+		return kryo;
 	}
 
 	/**

@@ -50,6 +50,9 @@ public class SopremoRecordComparatorFactory implements TypeComparatorFactory<Sop
 		this.typeRegistry = typeRegistry;
 		this.keyExpressions = keyExpressions;
 		this.ascending = ascending;
+		for (int index = 0; index < keyExpressions.length; index++)
+			if (this.keyExpressions[index] == -1)
+				throw new IllegalArgumentException();
 	}
 
 	/*
