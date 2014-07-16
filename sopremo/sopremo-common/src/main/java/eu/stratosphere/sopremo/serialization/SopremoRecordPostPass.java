@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.ListMultimap;
 
 import eu.stratosphere.api.common.distributions.DataDistribution;
 import eu.stratosphere.api.common.operators.DualInputOperator;
@@ -73,7 +73,7 @@ public class SopremoRecordPostPass extends GenericFlatTypePostPass<Class<? exten
 
 	private ITypeRegistry typeRegistry;
 
-	private final static boolean PRUNE_LAYOUT = true;
+	public final static boolean PRUNE_LAYOUT = true;
 
 	/*
 	 * (non-Javadoc)
@@ -189,9 +189,13 @@ public class SopremoRecordPostPass extends GenericFlatTypePostPass<Class<? exten
 
 	private void addIdentityMapsToOutputsWithMultipleChannels(OptimizedPlan plan) {
 		for (PlanNode node : plan.getAllNodes()) {
+			if(node instanceof WorksetIterationPlanNode) 
+				node = addDummyNode(node, node.getOutgoingChannels(), node.getOutgoingChannels(), 
+					((SopremoRecordSerializerFactory)((WorksetIterationPlanNode) node).getSolutionSetSerializer()).getLayout());
+
 			List<Channel> outgoingChannels = node.getOutgoingChannels();
 			if (outgoingChannels.size() > 1) {
-				Multimap<SopremoRecordLayout, Channel> layouts = ArrayListMultimap.create();
+				ListMultimap<SopremoRecordLayout, Channel> layouts = ArrayListMultimap.create();
 				for (Channel channel : outgoingChannels)
 					layouts.put(((SopremoRecordSerializerFactory) channel.getSerializer()).getLayout(), channel);
 
@@ -200,42 +204,52 @@ public class SopremoRecordPostPass extends GenericFlatTypePostPass<Class<? exten
 					// layout to dummy node is empty, so we can ignore all nodes that also require empty layout
 					layouts.removeAll(SopremoRecordLayout.EMPTY);
 
-					ITypeRegistry registry = ((SopremoRecordSerializerFactory) outgoingChannels.get(0).getSerializer()).getTypeRegistry();
 					for (SopremoRecordLayout layout : layouts.keySet()) {
-						Channel inMemoryChannel = new Channel(node);
-						inMemoryChannel.setShipStrategy(ShipStrategyType.FORWARD);
-						inMemoryChannel.setLocalStrategy(LocalStrategy.NONE);
-
-						MapDescriptor mapDescriptor = new MapDescriptor();
-						MapNode mapNode = new MapNode(new MapOperatorBase<IdentityMap>(IdentityMap.class, "dummy"));
-						mapNode.setDegreeOfParallelism(node.getDegreeOfParallelism());
-						mapNode.setSubtasksPerInstance(node.getSubtasksPerInstance());
-						SingleInputPlanNode dummyNode = mapDescriptor.instantiate(inMemoryChannel, mapNode);
-						inMemoryChannel.setTarget(dummyNode);
-						inMemoryChannel.setSerializer(new SopremoRecordSerializerFactory(SopremoRecordLayout.EMPTY, registry));
-
-						Collection<Channel> channelsToBeChanged = layouts.get(layout);
-						for (Channel originalChannel : channelsToBeChanged) {
-							Channel channelWithNewSource = new ForwardingChannel(dummyNode, originalChannel);
-							PlanNode target = originalChannel.getTarget();
-							if (target instanceof SingleInputPlanNode)
-								ReflectUtil.setField(target, "input", channelWithNewSource);
-							else if (target instanceof DualInputPlanNode) {
-								if (target instanceof WorksetIterationPlanNode) {
-									System.out.println(target);
-								} else if (((DualInputPlanNode) target).getInput1() == originalChannel)
-									ReflectUtil.setField(target, "input1", channelWithNewSource);
-								else
-									ReflectUtil.setField(target, "input2", channelWithNewSource);
-							} else
-								throw new UnsupportedOperationException();
-
-							outgoingChannels.set(outgoingChannels.indexOf(originalChannel), inMemoryChannel);
-						}
+						List<Channel> channelsToBeChanged = layouts.get(layout);
+						addDummyNode(node, outgoingChannels, channelsToBeChanged, SopremoRecordLayout.EMPTY);
 					}
 				}
 			}
 		}
+	}
+
+	/**
+	 * @param node
+	 * @param outgoingChannels
+	 * @param channelsToBeChanged
+	 */
+	private PlanNode addDummyNode(PlanNode node, List<Channel> outgoingChannels, List<Channel> channelsToBeChanged, SopremoRecordLayout layout) {
+		ITypeRegistry registry = ((SopremoRecordSerializerFactory) outgoingChannels.get(0).getSerializer()).getTypeRegistry();
+		Channel inMemoryChannel = new Channel(node);
+		inMemoryChannel.setShipStrategy(ShipStrategyType.FORWARD);
+		inMemoryChannel.setLocalStrategy(LocalStrategy.NONE);
+
+		MapDescriptor mapDescriptor = new MapDescriptor();
+		MapNode mapNode = new MapNode(new MapOperatorBase<IdentityMap>(IdentityMap.class, "dummy"));
+		mapNode.setDegreeOfParallelism(node.getDegreeOfParallelism());
+		mapNode.setSubtasksPerInstance(node.getSubtasksPerInstance());
+		SingleInputPlanNode dummyNode = mapDescriptor.instantiate(inMemoryChannel, mapNode);
+		inMemoryChannel.setTarget(dummyNode);
+		inMemoryChannel.setSerializer(new SopremoRecordSerializerFactory(layout, registry));
+
+		for (Channel originalChannel : channelsToBeChanged) {
+			Channel channelWithNewSource = new ForwardingChannel(dummyNode, originalChannel);
+			PlanNode target = originalChannel.getTarget();
+			if (target instanceof SingleInputPlanNode)
+				ReflectUtil.setField(target, "input", channelWithNewSource);
+			else if (target instanceof DualInputPlanNode) {
+				if (target instanceof WorksetIterationPlanNode) {
+					System.out.println(target);
+				} else if (((DualInputPlanNode) target).getInput1() == originalChannel)
+					ReflectUtil.setField(target, "input1", channelWithNewSource);
+				else
+					ReflectUtil.setField(target, "input2", channelWithNewSource);
+			} else
+				throw new UnsupportedOperationException();
+
+			outgoingChannels.set(outgoingChannels.indexOf(originalChannel), inMemoryChannel);
+		}
+		return dummyNode;
 	}
 
 	/**

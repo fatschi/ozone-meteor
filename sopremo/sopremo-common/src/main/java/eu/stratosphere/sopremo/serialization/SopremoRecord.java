@@ -18,8 +18,6 @@ import it.unimi.dsi.fastutil.bytes.ByteArrayList;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -101,42 +99,47 @@ public class SopremoRecord extends AbstractSopremoType implements ISopremoType {
 
 	private transient DataKryo kryo;
 
+	private transient ITypeRegistry registry;
+
 	public SopremoRecord(SopremoRecordLayout layout, ITypeRegistry registry) {
 		this.init(layout, registry);
 	}
 
 	void init(SopremoRecordLayout layout, ITypeRegistry registry) {
-		this.layout = layout;
-		this.offsets = new int[layout.getNumKeys()];
+		if (!layout.equals(this.layout)) {
+			this.layout = layout;
+			this.offsets = new int[layout.getNumKeys()];
+		}
 
-		this.kryo = new DataKryo();
-		this.kryo.setReferences(false);
+		if (this.registry != registry) {
+			this.kryo = new DataKryo();
+			this.kryo.setReferences(false);
 
-		final List<Class<?>> defaultTypes =
-			Arrays.<Class<?>> asList(BooleanNode.class, NullNode.class, MissingNode.class, TextNode.class, TreeMap.class, ArrayList.class,
-				ObjectNode.class, CachingArrayNode.class);
-		for (final Class<?> type : defaultTypes)
-			this.kryo.register(type);
-		this.kryo.register(BigDecimal.class);
-		this.kryo.register(BigInteger.class);
-		this.kryo.getRegistration(ObjectNode.class).setSerializer(new ObjectSerializer());
-		this.kryo.getRegistration(CachingArrayNode.class).setSerializer(new CachingArraySerializer());
-		this.kryo.registerAlias(IObjectNode.class, ObjectNode.class);
-		this.kryo.registerAlias(IArrayNode.class, CachingArrayNode.class);
-		this.kryo.registerAlias(ArrayNode.class, CachingArrayNode.class);
-		this.kryo.registerAlias(BooleanNode.UnmodifiableBoolean.class, BooleanNode.class);
+			final List<Class<?>> defaultTypes =
+				Arrays.<Class<?>> asList(BooleanNode.class, NullNode.class, MissingNode.class, TextNode.class, TreeMap.class,
+					ArrayList.class,
+					ObjectNode.class, CachingArrayNode.class);
+			for (final Class<?> type : defaultTypes)
+				this.kryo.register(type);
+			this.kryo.getRegistration(ObjectNode.class).setSerializer(new ObjectSerializer());
+			this.kryo.getRegistration(CachingArrayNode.class).setSerializer(new CachingArraySerializer());
+			this.kryo.registerAlias(IObjectNode.class, ObjectNode.class);
+			this.kryo.registerAlias(IArrayNode.class, CachingArrayNode.class);
+			this.kryo.registerAlias(ArrayNode.class, CachingArrayNode.class);
+			this.kryo.registerAlias(BooleanNode.UnmodifiableBoolean.class, BooleanNode.class);
 
-		for (final Class<?> type : TypeCoercer.NUMERIC_TYPES)
-			this.kryo.register(type, new ReusingFieldSerializer<Object>(this.kryo, type));
+			for (final Class<?> type : TypeCoercer.NUMERIC_TYPES)
+				this.kryo.register(type, new ReusingFieldSerializer<Object>(this.kryo, type));
 
-		final List<Class<? extends IJsonNode>> types = registry.getTypes();
-		for (final Class<? extends IJsonNode> type : types) {
-			final Registration registration = this.kryo.register(type);
-			final Serializer<?> serializer = registration.getSerializer();
-			if (serializer.getClass() == FieldSerializer.class)
-				registration.setSerializer(new ReusingFieldSerializer<IJsonNode>(this.kryo, type));
-			else if (!ReusingSerializer.class.isInstance(serializer)) 
-				throw new IllegalStateException("Custom type serializers must be ReusingSerializers");
+			final List<Class<? extends IJsonNode>> types = registry.getTypes();
+			for (final Class<? extends IJsonNode> type : types) {
+				final Registration registration = this.kryo.register(type);
+				final Serializer<?> serializer = registration.getSerializer();
+				if (serializer.getClass() == FieldSerializer.class)
+					registration.setSerializer(new ReusingFieldSerializer<IJsonNode>(this.kryo, type));
+				else if (!ReusingSerializer.class.isInstance(serializer))
+					throw new IllegalStateException("Custom type serializers must be ReusingSerializers");
+			}
 		}
 	}
 
@@ -253,6 +256,9 @@ public class SopremoRecord extends AbstractSopremoType implements ISopremoType {
 			throw new IllegalStateException("Attempt to read zero length binary representation");
 		this.binaryRepresentation.size(size);
 		in.readFully(this.binaryRepresentation.elements(), 0, size);
+		if (SopremoUtil.DEBUG && this.binaryRepresentation.get(0) == 0)
+			throw new IllegalStateException("Binary representation cannot start with 0");
+//		System.err.println("read " + this.offsets.length + " + " + size + " " + this.binaryRepresentation);
 	}
 
 	void write(final DataOutputView out) throws IOException {
@@ -283,8 +289,13 @@ public class SopremoRecord extends AbstractSopremoType implements ISopremoType {
 			out.writeInt(this.offsets[index]);
 		}
 		final int size = this.binaryRepresentation.size();
+		if (SopremoUtil.DEBUG && size <= 0)
+			throw new IllegalStateException("Attempt to write zero length binary representation");
+		if (SopremoUtil.DEBUG && this.binaryRepresentation.get(0) == 0)
+			throw new IllegalStateException("Binary representation cannot start with 0");
 		out.writeInt(size);
 		out.write(this.binaryRepresentation.elements(), 0, size);
+//		System.err.println("write " + this.offsets.length + " + " + size + " " + this.binaryRepresentation);
 	}
 
 	private int getKeyOffset(final int expressionIndex) {
@@ -369,7 +380,7 @@ public class SopremoRecord extends AbstractSopremoType implements ISopremoType {
 			}
 
 			final int size = array.size();
-			output.writeInt(size);
+			output.writeInt(size, true);
 
 			for (int index = 0; index < size; index++) {
 				final ExpressionIndex subIndex = expressionIndex.subIndex(index);
@@ -392,7 +403,7 @@ public class SopremoRecord extends AbstractSopremoType implements ISopremoType {
 				return;
 			}
 
-			output.writeInt(object.size());
+			output.writeInt(object.size(), true);
 
 			for (final Entry<String, IJsonNode> entry : object) {
 				final String fieldName = entry.getKey();

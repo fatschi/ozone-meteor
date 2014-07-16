@@ -1,4 +1,4 @@
-// $ANTLR 3.4 /home/arvid/workspace/sopremo/meteor/meteor-meteor/src/main/java/eu/stratosphere/meteor/Meteor.g 2014-05-28 12:49:48
+// $ANTLR 3.4 /home/arvid/workspace/sopremo/meteor/meteor-meteor/src/main/java/eu/stratosphere/meteor/Meteor.g 2014-07-14 11:47:03
  
 package eu.stratosphere.meteor; 
 
@@ -2880,7 +2880,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
             // AST REWRITE
-            // elements: e1, e1, e2, e1, e1, e2, e2
+            // elements: e2, e1, e1, e1, e2, e1, e2
             // token labels: 
             // rule labels: retval, e1, e2
             // token list labels: 
@@ -3091,7 +3091,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
             // AST REWRITE
-            // elements: e2, e1, e1
+            // elements: e1, e2, e1
             // token labels: 
             // rule labels: retval, e1, e2
             // token list labels: 
@@ -3261,7 +3261,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
             // AST REWRITE
-            // elements: e2, e1, e1
+            // elements: e1, e1, e2
             // token labels: 
             // rule labels: retval, e1, e2
             // token list labels: 

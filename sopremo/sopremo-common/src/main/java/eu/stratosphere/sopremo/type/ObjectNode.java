@@ -207,7 +207,7 @@ public class ObjectNode extends AbstractJsonNode implements IObjectNode, KryoCop
 		 */
 		@Override
 		public ObjectNode read(final Kryo kryo, final Input input, final Class<IObjectNode> type) {
-			final int len = input.readInt();
+			final int len = input.readInt(true);
 
 			final ObjectNode object = new ObjectNode();
 			for (int i = 0; i < len; i++) {
@@ -228,7 +228,7 @@ public class ObjectNode extends AbstractJsonNode implements IObjectNode, KryoCop
 			if (object == null)
 				return this.read(kryo, input, type);
 
-			final int len = input.readInt();
+			final int len = input.readInt(true);
 
 			// performance optimization: reuse existing nodes
 			final SortedMap<String, IJsonNode> children = ((ObjectNode) object).children;
@@ -252,7 +252,7 @@ public class ObjectNode extends AbstractJsonNode implements IObjectNode, KryoCop
 		 */
 		@Override
 		public void write(final Kryo kryo, final Output output, final IObjectNode object) {
-			output.writeInt(object.size());
+			output.writeInt(object.size(), true);
 
 			for (final Entry<String, IJsonNode> entry : object) {
 				output.writeString(entry.getKey());

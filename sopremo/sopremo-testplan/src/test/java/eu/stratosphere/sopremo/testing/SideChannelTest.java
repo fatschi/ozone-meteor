@@ -14,12 +14,14 @@
  **********************************************************************************************************************/
 package eu.stratosphere.sopremo.testing;
 
-import java.io.IOException;
-
 import org.junit.Test;
 
 import eu.stratosphere.sopremo.CoreFunctions;
-import eu.stratosphere.sopremo.expressions.*;
+import eu.stratosphere.sopremo.expressions.ArrayCreation;
+import eu.stratosphere.sopremo.expressions.ArrayProjection;
+import eu.stratosphere.sopremo.expressions.EvaluationExpression;
+import eu.stratosphere.sopremo.expressions.JsonStreamExpression;
+import eu.stratosphere.sopremo.expressions.ObjectAccess;
 import eu.stratosphere.sopremo.function.FunctionUtil;
 import eu.stratosphere.sopremo.io.CsvFormat;
 import eu.stratosphere.sopremo.io.Source;
@@ -40,7 +42,7 @@ public class SideChannelTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void sideChannelSupported() throws IOException {
+	public void sideChannelSupported() {
 		final Source source = new Source(new CsvFormat(), SopremoTestUtil.getResourcePath("SideChannelTest/dict.csv"));
 
 		final TestProjection projection = new TestProjection();
@@ -72,7 +74,7 @@ public class SideChannelTest {
 	 * @throws IOException
 	 */
 	@Test(expected = AssertionError.class)
-	public void shouldProperlyFail() throws IOException {
+	public void shouldProperlyFail() {
 		final Source source = new Source(SopremoTestUtil.getResourcePath("SideChannelTest/dict.csv"));
 
 		final TestProjection projection = new TestProjection();

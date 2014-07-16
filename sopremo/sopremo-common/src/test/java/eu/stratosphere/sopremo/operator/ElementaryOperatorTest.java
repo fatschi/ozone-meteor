@@ -3,8 +3,6 @@ package eu.stratosphere.sopremo.operator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
-
 import org.junit.Test;
 
 import eu.stratosphere.api.common.functions.AbstractFunction;
@@ -46,8 +44,8 @@ public class ElementaryOperatorTest {
 	public void getFunctionClassShouldReturnTheFirstFunction() {
 		final Class<? extends Function> stubClass = new OperatorWithTwoFunctions().getFunctionClass();
 		assertEquals(OperatorWithTwoFunctions.class, stubClass.getDeclaringClass());
-		assertTrue(Arrays.asList(OperatorWithTwoFunctions.Implementation1.class,
-			OperatorWithTwoFunctions.Implementation2.class).contains(stubClass));
+		assertTrue(OperatorWithTwoFunctions.Implementation1.class == stubClass ||
+			OperatorWithTwoFunctions.Implementation2.class == stubClass);
 	}
 
 	@Test
@@ -82,8 +80,9 @@ public class ElementaryOperatorTest {
 		final eu.stratosphere.api.common.operators.Operator contract =
 			new OperatorWithTwoFunctions().getOperator(layout);
 		assertEquals(SopremoReduceOperator.class, contract.getClass());
-		assertTrue(Arrays.asList(OperatorWithTwoFunctions.Implementation1.class,
-			OperatorWithTwoFunctions.Implementation2.class).contains(contract.getUserCodeWrapper().getUserCodeClass()));
+		Class<?> userCodeClass = contract.getUserCodeWrapper().getUserCodeClass();
+		assertTrue(OperatorWithTwoFunctions.Implementation1.class == userCodeClass ||
+				OperatorWithTwoFunctions.Implementation2.class == userCodeClass);
 	}
 
 	@Test

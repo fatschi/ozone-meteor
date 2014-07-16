@@ -5,8 +5,6 @@ import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import eu.stratosphere.core.testing.TestPlan;
-import eu.stratosphere.sopremo.io.JsonFormat.JsonInputFormat;
 import eu.stratosphere.sopremo.testing.SopremoTestPlan;
 
 /**

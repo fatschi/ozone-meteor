@@ -26,7 +26,6 @@ import org.junit.Test;
 import com.google.common.collect.Lists;
 
 import eu.stratosphere.api.common.operators.Order;
-import eu.stratosphere.core.testing.IteratorUtil;
 import eu.stratosphere.sopremo.expressions.ArrayAccess;
 import eu.stratosphere.sopremo.expressions.EvaluationExpression;
 import eu.stratosphere.sopremo.expressions.OrderingExpression;

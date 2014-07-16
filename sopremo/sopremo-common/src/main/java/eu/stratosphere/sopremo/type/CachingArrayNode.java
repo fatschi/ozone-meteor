@@ -119,7 +119,7 @@ public class CachingArrayNode<T extends IJsonNode> extends ArrayNode<T> {
 			if (oldInstance == null)
 				return this.read(kryo, input, type);
 
-			final int len = input.readInt();
+			final int len = input.readInt(true);
 
 			final int currentLen = oldInstance.size();
 			for (int i = 0, size = Math.min(currentLen, len); i < size; i++)

@@ -45,6 +45,7 @@ import eu.stratosphere.sopremo.pact.UntypedRecordToJsonIterator;
 import eu.stratosphere.sopremo.serialization.PlanWithSopremoPostPass;
 import eu.stratosphere.sopremo.serialization.SopremoRecord;
 import eu.stratosphere.sopremo.serialization.SopremoRecordLayout;
+import eu.stratosphere.sopremo.serialization.SopremoRecordPostPass;
 import eu.stratosphere.sopremo.type.IJsonNode;
 import eu.stratosphere.sopremo.type.JsonUtil;
 import eu.stratosphere.util.AbstractIterator;
@@ -755,7 +756,7 @@ public class SopremoTestPlan {
 
 		protected SopremoRecordTestPlan(final SopremoRecordLayout layout, final ITypeRegistry typeRegistry,
 				final Collection<? extends eu.stratosphere.api.common.operators.Operator> contracts) {
-			super(SopremoTestRecords.getTypeConfig(SopremoRecordLayout.create(), typeRegistry), contracts);
+			super(SopremoTestRecords.getTypeConfig(SopremoRecordPostPass.PRUNE_LAYOUT ? SopremoRecordLayout.create() : layout, typeRegistry), contracts);
 			this.layout = layout;
 			this.typeRegistry = typeRegistry;
 		}

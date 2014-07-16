@@ -33,13 +33,7 @@ import eu.stratosphere.core.fs.Path;
 import eu.stratosphere.nephele.client.JobClient;
 import eu.stratosphere.nephele.client.JobExecutionResult;
 import eu.stratosphere.nephele.execution.librarycache.LibraryCacheManager;
-import eu.stratosphere.nephele.jobgraph.AbstractJobVertex;
-import eu.stratosphere.nephele.jobgraph.JobEdge;
 import eu.stratosphere.nephele.jobgraph.JobGraph;
-import eu.stratosphere.nephele.jobgraph.JobTaskVertex;
-import eu.stratosphere.pact.runtime.iterative.task.IterationHeadPactTask;
-import eu.stratosphere.pact.runtime.iterative.task.IterationIntermediatePactTask;
-import eu.stratosphere.pact.runtime.task.RegularPactTask;
 import eu.stratosphere.sopremo.execution.ExecutionResponse.ExecutionState;
 import eu.stratosphere.sopremo.io.Sink;
 import eu.stratosphere.sopremo.operator.Operator;
@@ -89,26 +83,7 @@ public class SopremoExecutionThread implements Runnable {
 		final OptimizedPlan optPlan = compiler.compile(pactPlan);
 		final NepheleJobGraphGenerator gen = new NepheleJobGraphGenerator();
 		JobGraph jobGraph = gen.compileJobGraph(optPlan);
-		for (AbstractJobVertex vertex : jobGraph.getAllJobVertices()) {
-			if(vertex instanceof JobTaskVertex && ((JobTaskVertex)vertex).getTaskClass() == IterationIntermediatePactTask.class) {
-				if(!isTrueIterationTask(vertex))
-					((JobTaskVertex)vertex).setTaskClass(RegularPactTask.class);
-			}
-		}
 		return jobGraph;
-	}
-
-	private boolean isTrueIterationTask(AbstractJobVertex vertex) {
-		if(vertex.getInvokableClass() == IterationHeadPactTask.class)
-			return true;
-		
-		for (int index = 0; index < vertex.getNumberOfBackwardConnections(); index++) {
-			JobEdge backwardConnection = vertex.getBackwardConnection(index);
-			
-			if(isTrueIterationTask(backwardConnection.getConnectedVertex()))
-				return true;
-		}
-		return false;
 	}
 
 	private JobExecutionResult executePlan(final SopremoPlan plan, Configuration jobConfig) {

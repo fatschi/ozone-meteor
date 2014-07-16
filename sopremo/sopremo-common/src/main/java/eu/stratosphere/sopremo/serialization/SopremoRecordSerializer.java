@@ -30,7 +30,7 @@ public class SopremoRecordSerializer extends TypeSerializer<SopremoRecord> {
 
 	private final ITypeRegistry typeRegistry;
 
-	private transient SopremoRecord readRecord;
+	private transient SopremoRecord writeRecord, readRecord;
 
 	/**
 	 * Creates a new instance of the SopremoRecordSerializers. Private to prevent instantiation.
@@ -40,6 +40,24 @@ public class SopremoRecordSerializer extends TypeSerializer<SopremoRecord> {
 			throw new NullPointerException();
 		this.layout = layout;
 		this.typeRegistry = typeRegistry;
+	}
+
+	/**
+	 * Returns the layout.
+	 * 
+	 * @return the layout
+	 */
+	public SopremoRecordLayout getLayout() {
+		return this.layout;
+	}
+
+	/**
+	 * Returns the typeRegistry.
+	 * 
+	 * @return the typeRegistry
+	 */
+	public ITypeRegistry getTypeRegistry() {
+		return this.typeRegistry;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -94,9 +112,13 @@ public class SopremoRecordSerializer extends TypeSerializer<SopremoRecord> {
 	 * eu.stratosphere.core.memory.DataInputViewV2)
 	 */
 	@Override
-	public void deserialize(final SopremoRecord target, final DataInputView source) throws IOException {
-		target.read(source);
-		target.parseNode();
+	public void deserialize(final SopremoRecord record, final DataInputView source) throws IOException {
+		if (this.readRecord != record) {
+			this.readRecord = record;
+			this.readRecord.init(this.layout, this.typeRegistry);
+		}
+		record.read(source);
+		record.parseNode();
 	}
 
 	/*
@@ -115,9 +137,9 @@ public class SopremoRecordSerializer extends TypeSerializer<SopremoRecord> {
 	 */
 	@Override
 	public void serialize(final SopremoRecord record, final DataOutputView target) throws IOException {
-		if (this.readRecord != record) {
-			this.readRecord = record;
-			this.readRecord.init(this.layout, this.typeRegistry);
+		if (this.writeRecord != record) {
+			this.writeRecord = record;
+			this.writeRecord.init(this.layout, this.typeRegistry);
 		}
 		record.write(target);
 	}
